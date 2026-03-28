@@ -8,6 +8,12 @@ NC='\033[0m' # No Color
 
 echo -e "${GREEN}🚀 AliParfume botini yangilash va ishga tushirish...${NC}"
 
+# 0. Git'dan yangi kodni tortib olish
+if [ -d .git ]; then
+    echo -e "${GREEN}📥 GitHub'dan yangilanishlar tekshirilmoqda...${NC}"
+    git pull origin main
+fi
+
 # 1. .env faylini tekshirish
 if [ ! -f .env ]; then
     echo -e "${YELLOW}📝 .env fayli topilmadi. .env.example dan nusxa olinmoqda...${NC}"
