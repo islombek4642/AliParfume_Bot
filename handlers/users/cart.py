@@ -187,7 +187,11 @@ async def checkout_confirm_final(message: Message, state: FSMContext, session: A
     
     # Send to Channel
     try:
+        from utils.timezone import get_now
+        current_time = get_now().strftime("%d.%m.%Y %H:%M")
+        
         channel_msg = I18N.get("order_success_channel", "uz").format(
+            time=current_time,
             name=user.full_name,
             user_id=message.from_user.id,
             phone=user.phone,

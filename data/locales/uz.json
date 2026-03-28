@@ -57,18 +57,18 @@
   "admin_broadcast_preview": "⚠️ **Xabar namunasi**:\n\n---\n",
   "admin_broadcast_confirm": "\n---\n\nUshbu xabarni barcha ({total} ta) foydalanuvchilarga yubormoqchimisiz?",
   "admin_broadcast_cancelled": "Reklama yuborish bekor qilindi.",
-  "admin_broadcast_summary": "✅ **Reklama hisoboti**:\n\n👤 Jami: {total}\n✅ Yetkazildi: {success}\n🚫 Bloklaganlar: {blocked}\n⚠️ Xatolar: {error}",
-  "about_text": "🌟 **AliParfume** — bu o'ziga xos va unutilmas atirlar olami! ✨\n\nBizning do'konimizda siz dunyoga mashhur brendlarning eng sara atirlari va sifatli kosmetika vositalarini topishingiz mumkin. Biz har bir mijozga alohida yondashamiz va faqat sifatli mahsulotlarni taklif etamiz.\n\n📍 Bizning manzil: Toshkent shahri, Toshkent Mall 2-qavat\n📞 Aloqa: +998 90 123 45 67\n🚚 O'zbekiston bo'ylab yetkazib berish mavjud!",
+  "admin_broadcast_summary": "✅ Reklama hisoboti:\n\n👤 Jami: {total}\n✅ Yetkazildi: {success}\n🚫 Bloklaganlar: {blocked}\n⚠️ Xatolar: {error}",
+  "about_text": "🌟 AliParfume — bu o'ziga xos va unutilmas atirlar olami! ✨\n\nBizning do'konimizda siz dunyoga mashhur brendlarning eng sara atirlari va sifatli kosmetika vositalarini topishingiz mumkin. Biz har bir mijozga alohida yondashamiz va faqat sifatli mahsulotlarni taklif etamiz.\n\n📍 Bizning manzil: Toshkent shahri, Toshkent Mall 2-qavat\n📞 Aloqa: +998 90 123 45 67\n🚚 O'zbekiston bo'ylab yetkazib berish mavjud!",
   "admin_btn_cancel": "❌ Bekor qilish",
   "btn_prev": "⬅️ Oldingi",
   "btn_next": "Keyingi ➡️",
   "btn_buy_inline": "🛒 Sotib olish",
   "product_count": "Mahsulot {current} / {total}",
-  "checkout_ask_address": "🚚 Iltimos, yetkazib berish manzilingizni to'liq nomini yozib yuboring yakunlash uchun (masalan: Chilonzor 3-kv...)\n\n📍 Yoki pastdagi tugmani bosib lokatsiyangizni yuboring:\n⚠️ *(Lokatsiya yuborishdan oldin telefoningizda GPS yoniq ekanligini tekshiring!)*",
+  "checkout_ask_address": "🚚 Iltimos, yetkazib berish manzilingizni to'liq nomini yozib yuboring yakunlash uchun (masalan: Chilonzor 3-kv...)\n\n📍 Yoki pastdagi tugmani bosib lokatsiyangizni yuboring:\n⚠️ (Lokatsiya yuborishdan oldin telefoningizda GPS yoniq ekanligini tekshiring!)",
   "btn_send_location": "📍 Lokatsiyani yuborish",
   "btn_cancel_checkout": "❌ Bekor qilish",
   "checkout_cancelled": "🛑 Xarid bekor qilindi. Savatchangizdagi mahsulotlar saqlanib qoldi.",
   "checkout_invoice": "🧾 SIZNING BUYURTMANGIZ:\n\n{items}\n----------------------\n📍 Yetkazib berish manzili: {address}\n💰 Jami to'lov: {total} so'm\n\nTo'lov turi: Xarid qabul qilinganda.",
   "checkout_confirm_prompt": "Buyurtmani tasdiqlaysizmi?",
-  "order_success_channel": "📦 YANGI BUYURTMA!\n\n👤 Mijoz: {name} (<a href='tg://user?id={user_id}'>Profilga o'tish</a>)\n📞 Tel: {phone}\n📍 Manzil: {address}\n\n🛍 Mahsulotlar:\n{items}\n\n💰 Jami: {total} so'm\n💳 To'lov: Naqd/Karta (Yuzma-yuz)"
+  "order_success_channel": "📦 YANGI BUYURTMA!\n\n🕰 Vaqt: {time}\n👤 Mijoz: {name} (<a href='tg://user?id={user_id}'>Profilga o'tish</a>)\n📞 Tel: {phone}\n📍 Manzil: {address}\n\n🛍 Mahsulotlar:\n{items}\n\n💰 Jami: {total} so'm\n💳 To'lov: Naqd/Karta (Yuzma-yuz)"
 }
