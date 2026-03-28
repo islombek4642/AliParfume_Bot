@@ -6,7 +6,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from data.config import CONFIG
 from database.base import init_db, AsyncSessionLocal
 from handlers.users import start, catalog, cart
-from handlers.admin import panel, utils, products, orders_admin
+from handlers.admin import panel, utils, products, orders_admin, categories
 from middlewares.db_middleware import DbSessionMiddleware
 from middlewares.i18n_middleware import I18nMiddleware
 from aiogram.types import BotCommand, BotCommandScopeDefault
@@ -58,6 +58,7 @@ async def main():
     # Register Routers (Ordered by priority)
     dp.include_router(panel.router)
     dp.include_router(products.router)
+    dp.include_router(categories.router)
     dp.include_router(orders_admin.router)
     dp.include_router(cart.router)
     dp.include_router(start.router)

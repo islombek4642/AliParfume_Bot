@@ -74,5 +74,35 @@
   "admin_prompt_stock": "📦 Сколько единиц этого товара есть на складе? (Введите только число)",
   "stock_left": "📦 На складе: {count} шт.",
   "out_of_stock": "❌ Нет в наличии",
-  "error_not_enough_stock": "Извините, на нашем складе осталось только {count} единиц этого товара! Введите меньшее количество."
+  "error_not_enough_stock": "Извините, на нашем складе осталось только {count} единиц этого товара! Введите меньшее количество.",
+
+  "admin_btn_categories": "📂 Категории",
+  "admin_btn_cat_add": "➕ Добавить категорию",
+  "admin_btn_cat_delete": "🗑 Удалить категорию",
+  "admin_cat_list_header": "📂 <b>Категории ({count} шт.):</b>\n{lines}\n\nДобавить или удалить:",
+  "admin_cat_add_name_uz": "📝 Введите название категории на <b>узбекском</b>:",
+  "admin_cat_add_name_ru": "📝 Введите название категории на <b>русском</b>:",
+  "admin_cat_add_slug": "🔑 Введите <b>slug</b> для категории\n<i>(латиница, строчные, без пробелов — напр.: <code>parfume</code>, <code>cosmetic</code>)</i>",
+  "admin_cat_slug_invalid": "⚠️ Slug должен состоять только из латинских букв и _. Введите снова:",
+  "admin_cat_slug_exists": "⚠️ Slug <code>{slug}</code> уже существует. Введите другой:",
+  "admin_cat_added": "✅ Категория добавлена!\n\n📂 <b>{name_uz}</b> / {name_ru}\n🔑 Slug: <code>{slug}</code>",
+  "admin_cat_delete_prompt": "🗑 Какую категорию удалить?\n<i>⚠️ Внимание: все товары внутри также удалятся!</i>",
+  "admin_cat_deleted": "🗑 Категория <b>{name}</b> и все её товары удалены.",
+  "admin_cat_none": "⚠️ Нет категорий для удаления.",
+  "admin_cat_not_found": "⚠️ Категория не найдена. Выберите из списка:",
+  "admin_cancelled": "❌ Отменено.",
+
+  "order_status_processing": "📦 Qabul qilindi / Принят",
+  "order_status_shipped": "🚚 Yo'lda / В пути",
+  "order_status_completed": "✅ Yetkazildi / Доставлен",
+  "order_status_cancelled": "❌ Bekor qilindi / Отменён",
+  "order_btn_accept": "✅ Qabul qilish / Принять",
+  "order_btn_cancel_order": "❌ Bekor qilish / Отменить",
+  "order_btn_shipping": "🚚 Yo'lda / В пути",
+  "order_btn_delivered": "✅ Yetkazildi / Доставлено",
+
+  "order_dm_processing": "📦 Ваш заказ №{id} принят и готовится!",
+  "order_dm_shipped": "🚚 Ваш заказ №{id} отправлен в доставку!",
+  "order_dm_completed": "✅ Ваш заказ №{id} успешно доставлен! Спасибо за покупку 🙏",
+  "order_dm_cancelled": "❌ Ваш заказ №{id} был отменён. Свяжитесь с нами при наличии вопросов."
 }

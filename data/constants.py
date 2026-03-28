@@ -18,6 +18,24 @@ class AdminKeys(str, Enum):
     EDIT_PRODUCT = "admin_edit_product"
     DELETE_PRODUCT = "admin_delete_product"
     MAILING = "admin_mailing"
+    CATEGORIES = "admin_btn_categories"
+    CAT_ADD = "admin_btn_cat_add"
+    CAT_DELETE = "admin_btn_cat_delete"
+    CANCELLED = "admin_cancelled"
+
+class OrderKeys(str, Enum):
+    BTN_ACCEPT       = "order_btn_accept"
+    BTN_CANCEL_ORDER = "order_btn_cancel_order"
+    BTN_SHIPPING     = "order_btn_shipping"
+    BTN_DELIVERED    = "order_btn_delivered"
+    STATUS_PROCESSING = "order_status_processing"
+    STATUS_SHIPPED    = "order_status_shipped"
+    STATUS_COMPLETED  = "order_status_completed"
+    STATUS_CANCELLED  = "order_status_cancelled"
+    DM_PROCESSING = "order_dm_processing"
+    DM_SHIPPED    = "order_dm_shipped"
+    DM_COMPLETED  = "order_dm_completed"
+    DM_CANCELLED  = "order_dm_cancelled"
 
 class UserStates(str, Enum):
     # FSM States as strings for easy identification

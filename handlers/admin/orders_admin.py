@@ -3,31 +3,25 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from services.order_service import OrderService
 from services.product_service import ProductService
 from keyboards.inline import get_order_admin_keyboard
+from data.constants import OrderKeys
+from utils.localization import I18N
 
 router = Router()
 
-# Bilingual status labels shown in the callback answer popup
-STATUS_LABELS = {
-    "processing": "📦 Qabul qilindi / Принят",
-    "shipped":    "🚚 Yo'lda / В пути",
-    "completed":  "✅ Yetkazildi / Доставлен",
-    "cancelled":  "❌ Bekor qilindi / Отменён",
+# Status → popup label (bilingual, from JSON)
+STATUS_LABEL_KEY = {
+    "processing": OrderKeys.STATUS_PROCESSING,
+    "shipped":    OrderKeys.STATUS_SHIPPED,
+    "completed":  OrderKeys.STATUS_COMPLETED,
+    "cancelled":  OrderKeys.STATUS_CANCELLED,
 }
 
-# DM templates per language per status
-STATUS_DM = {
-    "uz": {
-        "processing": "📦 #{id}-raqamli buyurtmangiz qabul qilindi va tayyorlanmoqda!",
-        "shipped":    "🚚 #{id}-raqamli buyurtmangiz yetkazib berishga chiqdi!",
-        "completed":  "✅ #{id}-raqamli buyurtmangiz muvaffaqiyatli yetkazildi! Rahmat 🙏",
-        "cancelled":  "❌ #{id}-raqamli buyurtmangiz bekor qilindi. Savollaringiz bo'lsa murojaat qiling.",
-    },
-    "ru": {
-        "processing": "📦 Ваш заказ №{id} принят и готовится!",
-        "shipped":    "🚚 Ваш заказ №{id} отправлен в доставку!",
-        "completed":  "✅ Ваш заказ №{id} успешно доставлен! Спасибо за покупку 🙏",
-        "cancelled":  "❌ Ваш заказ №{id} был отменён. Свяжитесь с нами при необходимости.",
-    }
+# Status → DM message key per language
+STATUS_DM_KEY = {
+    "processing": OrderKeys.DM_PROCESSING,
+    "shipped":    OrderKeys.DM_SHIPPED,
+    "completed":  OrderKeys.DM_COMPLETED,
+    "cancelled":  OrderKeys.DM_CANCELLED,
 }
 
 
@@ -51,7 +45,6 @@ async def handle_order_status(callback: types.CallbackQuery, session: AsyncSessi
             await product_service.update_stock(int(product_id_str), quantity)
 
     # ✅ Only edit the KEYBOARD — never touch the channel message text
-    # This prevents duplicate messages and preserves the original order info
     new_keyboard = get_order_admin_keyboard(order_id, new_status)
     try:
         await callback.message.edit_reply_markup(reply_markup=new_keyboard)
@@ -68,13 +61,15 @@ async def handle_order_status(callback: types.CallbackQuery, session: AsyncSessi
 
         if customer:
             lang = getattr(customer, "language", "uz") or "uz"
-            dm_template = STATUS_DM.get(lang, STATUS_DM["uz"]).get(new_status)
-            if dm_template:
-                dm_text = dm_template.format(id=order_id)
+            dm_key = STATUS_DM_KEY.get(new_status)
+            if dm_key:
+                dm_text = I18N.get(dm_key, lang).format(id=order_id)
                 await bot.send_message(customer.telegram_id, dm_text)
     except Exception as dm_err:
         import logging
         logging.warning(f"Could not DM customer for order {order_id}: {dm_err}")
 
-    label = STATUS_LABELS.get(new_status, new_status)
+    # Bilingual popup (same text in both languages)
+    label_key = STATUS_LABEL_KEY.get(new_status, "")
+    label = I18N.get(label_key, "uz") if label_key else new_status
     await callback.answer(f"✅ {label}", show_alert=False)

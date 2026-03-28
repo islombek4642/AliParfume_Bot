@@ -231,6 +231,9 @@ async def checkout_confirm_final(message: Message, state: FSMContext, session: A
         current_time = get_now().strftime("%d.%m.%Y %H:%M")
         tg_user = message.from_user
         full_name = user.full_name or "Foydalanuvchi"
+        # Truncate long names to keep channel message tidy
+        if len(full_name) > 30:
+            full_name = full_name[:27] + "..."
 
         # Address: use stored value (already HTML if location, plain text if typed)
         address_html = address if address else "Ko'rsatilmagan"

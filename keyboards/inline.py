@@ -38,24 +38,27 @@ def get_product_inline_keyboard(lang: str, category_id: int, current_index: int,
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
+from data.constants import OrderKeys
 
-# Sequential flow: each status → next possible actions
-_ORDER_STATUS_FLOW = {
-    "pending":    [("✅ Qabul qilish / Принять",    "processing"),
-                   ("❌ Bekor qilish / Отменить",   "cancelled")],
-    "processing": [("🚚 Yo'lda / В пути",           "shipped"),
-                   ("❌ Bekor qilish / Отменить",   "cancelled")],
-    "shipped":    [("✅ Yetkazildi / Доставлено",   "completed")],
-    "completed":  [],
-    "cancelled":  [],
-}
+# Sequential flow using I18N keys — bilingual labels (UZ/RU in one string)
+def _build_flow() -> dict:
+    uz = "uz"  # buttons are bilingual, reading from UZ locale which has both languages
+    return {
+        "pending":    [(I18N.get(OrderKeys.BTN_ACCEPT,       uz), "processing"),
+                       (I18N.get(OrderKeys.BTN_CANCEL_ORDER, uz), "cancelled")],
+        "processing": [(I18N.get(OrderKeys.BTN_SHIPPING,     uz), "shipped"),
+                       (I18N.get(OrderKeys.BTN_CANCEL_ORDER, uz), "cancelled")],
+        "shipped":    [(I18N.get(OrderKeys.BTN_DELIVERED,    uz), "completed")],
+        "completed":  [],
+        "cancelled":  [],
+    }
 
 def get_order_admin_keyboard(order_id: int, current_status: str = "pending") -> InlineKeyboardMarkup | None:
     """Sequential vertical keyboard for admin order management in the channel."""
-    steps = _ORDER_STATUS_FLOW.get(current_status, [])
+    flow = _build_flow()
+    steps = flow.get(current_status, [])
     if not steps:
         return None
-    # Each button gets its own row — vertical layout
     buttons = [
         [InlineKeyboardButton(text=label, callback_data=f"order_status:{order_id}:{next_s}")]
         for label, next_s in steps

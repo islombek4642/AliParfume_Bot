@@ -20,7 +20,7 @@ def get_main_menu_keyboard(lang: str, is_admin: bool = False) -> ReplyKeyboardMa
     if is_admin:
         # Add admin buttons to the bottom
         keyboard.append([KeyboardButton(text=I18N.get("admin_btn_stats", lang)), KeyboardButton(text=I18N.get("admin_btn_broadcast", lang))])
-        keyboard.append([KeyboardButton(text=I18N.get("admin_btn_add_product", lang))])
+        keyboard.append([KeyboardButton(text=I18N.get("admin_btn_add_product", lang)), KeyboardButton(text=I18N.get("admin_btn_categories", lang))])
         
     return ReplyKeyboardMarkup(
         keyboard=keyboard,
