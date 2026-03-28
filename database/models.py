@@ -36,6 +36,7 @@ class Product(Base):
     description_uz: Mapped[str] = mapped_column(String, nullable=True)
     description_ru: Mapped[str] = mapped_column(String, nullable=True)
     price: Mapped[float] = mapped_column(Float)
+    stock: Mapped[int] = mapped_column(default=0)
     photo_id: Mapped[str] = mapped_column(String(255), nullable=True)
 
     category = relationship("Category", back_populates="products")

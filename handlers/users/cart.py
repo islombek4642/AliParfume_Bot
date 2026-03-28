@@ -46,11 +46,25 @@ async def start_add_to_cart_inline(callback: types.CallbackQuery, state: FSMCont
 @router.message(CartState.waiting_for_quantity, F.text.regexp(r"^\d+$"))
 async def set_quantity(message: Message, state: FSMContext, session: AsyncSession, _, lang):
     user_service = UserService(session)
+    product_service = ProductService(session)
     quantity = int(message.text)
     data = await state.get_data()
     product_id = data.get("product_id")
     
     if product_id:
+        product = await product_service.get_by_id(product_id)
+        if not product:
+            await state.clear()
+            return
+        
+        # Stock validation
+        if product.stock is not None and quantity > product.stock:
+            await message.answer(
+                _("error_not_enough_stock").format(count=product.stock),
+                reply_markup=get_quantity_keyboard(lang)
+            )
+            return
+        
         await user_service.add_to_cart(message.from_user.id, product_id, quantity)
         is_admin = CONFIG.is_admin(message.from_user.id)
         await message.answer(_("cart_add_success"), reply_markup=get_main_menu_keyboard(lang, is_admin))
@@ -184,6 +198,10 @@ async def checkout_confirm_final(message: Message, state: FSMContext, session: A
 
     # Create order in DB with address
     await order_service.create(user.id, user.cart, total_price, address=address)
+    
+    # Deduct stock for each item
+    for product_id_str, quantity in user.cart.items():
+        await product_service.update_stock(int(product_id_str), -quantity)
     
     # Send to Channel
     try:

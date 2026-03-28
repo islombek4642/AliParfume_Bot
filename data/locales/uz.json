@@ -70,5 +70,9 @@
   "checkout_cancelled": "🛑 Xarid bekor qilindi. Savatchangizdagi mahsulotlar saqlanib qoldi.",
   "checkout_invoice": "🧾 SIZNING BUYURTMANGIZ:\n\n{items}\n----------------------\n📍 Yetkazib berish manzili: {address}\n💰 Jami to'lov: {total} so'm\n\nTo'lov turi: Xarid qabul qilinganda.",
   "checkout_confirm_prompt": "Buyurtmani tasdiqlaysizmi?",
-  "order_success_channel": "📦 YANGI BUYURTMA!\n\n🕰 Vaqt: {time}\n👤 Mijoz: {name} (<a href='tg://user?id={user_id}'>Profilga o'tish</a>)\n📞 Tel: {phone}\n📍 Manzil: {address}\n\n🛍 Mahsulotlar:\n{items}\n\n💰 Jami: {total} so'm\n💳 To'lov: Naqd/Karta (Yuzma-yuz)"
+  "order_success_channel": "📦 YANGI BUYURTMA!\n\n🕰 Vaqt: {time}\n👤 Mijoz: {name} (<a href='tg://user?id={user_id}'>Profilga o'tish</a>)\n📞 Tel: {phone}\n📍 Manzil: {address}\n\n🛍 Mahsulotlar:\n{items}\n\n💰 Jami: {total} so'm\n💳 To'lov: Naqd/Karta (Yuzma-yuz)",
+  "admin_prompt_stock": "📦 Ushbu mahsulotdan omborda nechta bor? (Faqat raqam yozing)",
+  "stock_left": "📦 Omborda mavjud: {count} dona",
+  "out_of_stock": "❌ Tugallangan",
+  "error_not_enough_stock": "Kechirasiz, hozirgi vaqtda omborimizda bu mahsulotdan faqat {count} dona qolgan! Kamroq miqdor kiriting."
 }

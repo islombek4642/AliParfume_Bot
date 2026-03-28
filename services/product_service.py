@@ -19,7 +19,7 @@ class ProductService:
         result = await self.session.execute(query)
         return list(result.scalars().all())
 
-    async def create(self, category_id: int, name_uz: str, name_ru: str, price: float, desc_uz: str, desc_ru: str, photo_id: str) -> Product:
+    async def create(self, category_id: int, name_uz: str, name_ru: str, price: float, desc_uz: str, desc_ru: str, photo_id: str, stock: int = 0) -> Product:
         product = Product(
             category_id=category_id,
             name_uz=name_uz,
@@ -27,7 +27,8 @@ class ProductService:
             price=price,
             description_uz=desc_uz,
             description_ru=desc_ru,
-            photo_id=photo_id
+            photo_id=photo_id,
+            stock=stock
         )
         self.session.add(product)
         await self.session.commit()
@@ -47,3 +48,8 @@ class ProductService:
         query = select(Product).where(or_(Product.name_uz == name, Product.name_ru == name))
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
+        
+    async def update_stock(self, product_id: int, quantity_change: int):
+        query = update(Product).where(Product.id == product_id).values(stock=Product.stock + quantity_change)
+        await self.session.execute(query)
+        await self.session.commit()

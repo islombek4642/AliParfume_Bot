@@ -19,6 +19,7 @@ class AddProductState(StatesGroup):
     waiting_for_desc_uz = State()
     waiting_for_desc_ru = State()
     waiting_for_price = State()
+    waiting_for_stock = State()
     waiting_for_photo = State()
 
 @router.message(F.from_user.id.in_(CONFIG.admin_ids), F.text.in_(I18N.get_all("admin_btn_add_product")))
@@ -83,10 +84,23 @@ async def process_price(message: Message, state: FSMContext, _, lang):
     try:
         price = float(message.text)
         await state.update_data(price=price)
+        await state.set_state(AddProductState.waiting_for_stock)
+        await message.answer(_("admin_prompt_stock"), reply_markup=get_admin_cancel_keyboard(lang))
+    except ValueError:
+        await message.answer(_("admin_prompt_price"), reply_markup=get_admin_cancel_keyboard(lang))
+
+@router.message(AddProductState.waiting_for_stock)
+async def process_stock(message: Message, state: FSMContext, _, lang):
+    from keyboards.reply import get_admin_cancel_keyboard
+    try:
+        stock = int(message.text)
+        if stock < 0:
+            raise ValueError
+        await state.update_data(stock=stock)
         await state.set_state(AddProductState.waiting_for_photo)
         await message.answer(_("admin_prompt_photo"), reply_markup=get_admin_cancel_keyboard(lang))
     except ValueError:
-        await message.answer(_("admin_prompt_price"), reply_markup=get_admin_cancel_keyboard(lang))
+        await message.answer(_("admin_prompt_stock"), reply_markup=get_admin_cancel_keyboard(lang))
 
 @router.message(AddProductState.waiting_for_photo, F.photo)
 async def process_photo(message: Message, state: FSMContext, session: AsyncSession, _, lang):
@@ -101,9 +115,11 @@ async def process_photo(message: Message, state: FSMContext, session: AsyncSessi
         data['price'],
         data['desc_uz'],
         data['desc_ru'],
-        photo_id
+        photo_id,
+        data['stock']
     )
     
     is_admin = CONFIG.is_admin(message.from_user.id)
+    from keyboards.reply import get_main_menu_keyboard
     await message.answer(_("admin_add_success"), reply_markup=get_main_menu_keyboard(lang, is_admin=is_admin))
     await state.clear()

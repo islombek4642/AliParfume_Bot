@@ -57,7 +57,8 @@ async def handle_category_selection(message: Message, session: AsyncSession, _, 
         caption = (
             f"<b>{name}</b>\n\n"
             f"<i>{_('product_desc')}{desc}</i>\n"
-            f"<b>{_('product_price')}{product.price:,} so'm</b>"
+            f"<b>{_('product_price')}{product.price:,} so'm</b>\n"
+            + (_("stock_left").format(count=product.stock) if product.stock > 0 else _("out_of_stock"))
         )
         
         reply_markup = get_product_inline_keyboard(lang, selected_category.id, 0, len(products), product.id)
@@ -84,7 +85,8 @@ async def handle_pagination(callback: types.CallbackQuery, session: AsyncSession
     caption = (
         f"<b>{name}</b>\n\n"
         f"<i>{_('product_desc')}{desc}</i>\n"
-        f"<b>{_('product_price')}{product.price:,} so'm</b>"
+        f"<b>{_('product_price')}{product.price:,} so'm</b>\n"
+        + (_("stock_left").format(count=product.stock) if product.stock > 0 else _("out_of_stock"))
     )
     
     reply_markup = get_product_inline_keyboard(lang, category_id, index, len(products), product.id)
