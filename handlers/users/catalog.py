@@ -89,15 +89,24 @@ async def handle_pagination(callback: types.CallbackQuery, session: AsyncSession
     reply_markup = get_product_inline_keyboard(lang, category_id, index, len(products), product.id)
     
     try:
-        if product.photo_id:
+        current_has_media = bool(callback.message.photo)
+        new_has_media = bool(product.photo_id)
+        
+        if current_has_media and new_has_media:
             await callback.message.edit_media(
                 media=types.InputMediaPhoto(media=product.photo_id, caption=caption, parse_mode="HTML"),
                 reply_markup=reply_markup
             )
-        else:
+        elif not current_has_media and not new_has_media:
             await callback.message.edit_text(text=caption, parse_mode="HTML", reply_markup=reply_markup)
-    except Exception:
-        pass # Handle cases where message content hasn't changed
+        else:
+            await callback.message.delete()
+            if new_has_media:
+                await callback.message.answer_photo(product.photo_id, caption=caption, parse_mode="HTML", reply_markup=reply_markup)
+            else:
+                await callback.message.answer(caption, parse_mode="HTML", reply_markup=reply_markup)
+    except Exception as e:
+        print(f"Pagination error: {e}")
     
     await callback.answer()
 

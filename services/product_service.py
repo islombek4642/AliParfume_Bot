@@ -13,7 +13,7 @@ class ProductService:
         return result.scalar_one_or_none()
 
     async def get_all(self, category_id: Optional[int] = None) -> List[Product]:
-        query = select(Product)
+        query = select(Product).order_by(Product.id)
         if category_id:
             query = query.where(Product.category_id == category_id)
         result = await self.session.execute(query)
