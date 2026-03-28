@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: aliparfume_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-aliparfume_user}
+      POSTGRES_PASSWORD: ${DB_PASS:-aliparfume_pass}
+      POSTGRES_DB: ${DB_NAME:-aliparfume_db}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  bot:
+    build: .
+    container_name: aliparfume_bot
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    restart: always
+
+volumes:
+  postgres_data:
