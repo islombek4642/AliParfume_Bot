@@ -1,5 +1,5 @@
 from aiogram import Router, F, Bot, types
-from aiogram.types import Message
+from aiogram.types import Message, LinkPreviewOptions
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from services.user_service import UserService
@@ -160,7 +160,7 @@ async def checkout_process_address(message: Message, state: FSMContext, session:
     )
 
     await state.set_state(CheckoutState.waiting_for_confirmation)
-    await message.answer(invoice, parse_mode="HTML", reply_markup=get_checkout_keyboard(lang), disable_web_page_preview=True)
+    await message.answer(invoice, parse_mode="HTML", reply_markup=get_checkout_keyboard(lang), link_preview_options=LinkPreviewOptions(is_disabled=True))
 
 @router.message(CheckoutState.waiting_for_confirmation)
 async def checkout_confirm_final(message: Message, state: FSMContext, session: AsyncSession, bot: Bot, _, lang):
@@ -264,7 +264,7 @@ async def checkout_confirm_final(message: Message, state: FSMContext, session: A
                 channel_text,
                 parse_mode="HTML",
                 reply_markup=get_order_admin_keyboard(order_obj.id),
-                disable_web_page_preview=True
+                link_preview_options=LinkPreviewOptions(is_disabled=True)
             )
     except Exception as e:
         import logging
@@ -339,12 +339,12 @@ async def _send_order_page(message_or_callback, orders, index: int, product_serv
     if edit:
         await message_or_callback.message.edit_text(
             text, parse_mode="HTML", reply_markup=keyboard,
-            disable_web_page_preview=True
+            link_preview_options=LinkPreviewOptions(is_disabled=True)
         )
     else:
         await message_or_callback.answer(
             text, parse_mode="HTML", reply_markup=keyboard,
-            disable_web_page_preview=True
+            link_preview_options=LinkPreviewOptions(is_disabled=True)
         )
 
 
