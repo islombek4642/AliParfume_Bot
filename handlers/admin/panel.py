@@ -6,7 +6,7 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.exceptions import TelegramForbiddenError, TelegramRetryAfter
 from services.user_service import UserService
 from services.order_service import OrderService
-from keyboards.reply import get_main_menu_keyboard, get_confirmation_keyboard
+from keyboards.reply import get_main_menu_keyboard, get_confirmation_keyboard, get_admin_cancel_keyboard
 from data.config import CONFIG
 from data.constants import AdminKeys
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,9 +29,15 @@ async def show_statistics(message: Message, session: AsyncSession, _):
     ))
 
 @router.message(F.from_user.id.in_(CONFIG.admin_ids), F.text.in_(I18N.get_all("admin_btn_broadcast")))
-async def start_broadcast(message: Message, state: FSMContext, _):
+async def start_broadcast(message: Message, state: FSMContext, _, lang):
     await state.set_state(BroadcastState.waiting_for_message)
-    await message.answer(_("admin_broadcast_prompt"))
+    await message.answer(_("admin_broadcast_prompt"), reply_markup=get_admin_cancel_keyboard(lang))
+
+@router.message(BroadcastState.waiting_for_message, F.text.in_(I18N.get_all("admin_btn_cancel")))
+async def cancel_broadcast_stage1(message: Message, state: FSMContext, _, lang):
+    await state.clear()
+    is_admin = CONFIG.is_admin(message.from_user.id)
+    await message.answer(_("admin_broadcast_cancelled"), reply_markup=get_main_menu_keyboard(lang, is_admin))
 
 @router.message(BroadcastState.waiting_for_message)
 async def preview_broadcast(message: Message, state: FSMContext, session: AsyncSession, _, lang):

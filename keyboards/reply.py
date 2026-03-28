@@ -95,6 +95,14 @@ def get_cart_delete_keyboard(lang: str, cart_items: list) -> ReplyKeyboardMarkup
         resize_keyboard=True
     )
 
+def get_admin_cancel_keyboard(lang: str) -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text=I18N.get("admin_btn_cancel", lang))]
+        ],
+        resize_keyboard=True
+    )
+
 def get_confirmation_keyboard(lang: str) -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[
