@@ -200,9 +200,25 @@ async def checkout_confirm_final(message: Message, state: FSMContext, session: A
     # Create order in DB with address
     order_obj = await order_service.create(user.id, user.cart, total_price, address=address)
     
-    # Deduct stock for each item
+    # Deduct stock for each item + notify admin if stock hits 0
     for product_id_str, quantity in user.cart.items():
         await product_service.update_stock(int(product_id_str), -quantity)
+        # Check if stock is now 0 — alert admins
+        try:
+            updated_product = await product_service.get_by_id(int(product_id_str))
+            if updated_product and updated_product.stock <= 0:
+                prod_name = updated_product.name_uz
+                alert_msg = (
+                    f"⚠️ OMBOR OGOHLANTIRISII!\n\n"
+                    f"📦 <b>{prod_name}</b> mahsuloti omborda tugadi!\n"
+                    f"Yangi partiya qo'shish uchun admin paneldan foydalaning."
+                )
+                for admin_id in CONFIG.admin_ids:
+                    await bot.send_message(admin_id, alert_msg, parse_mode="HTML")
+        except Exception as stock_err:
+            import logging
+            logging.warning(f"Stock alert failed for product {product_id_str}: {stock_err}")
+
     
     # Send to Channel
     try:

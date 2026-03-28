@@ -12,10 +12,12 @@ class ProductService:
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_all(self, category_id: Optional[int] = None) -> List[Product]:
+    async def get_all(self, category_id: int | None = None, in_stock_only: bool = True) -> List[Product]:
         query = select(Product).order_by(Product.id)
         if category_id:
             query = query.where(Product.category_id == category_id)
+        if in_stock_only:
+            query = query.where(Product.stock > 0)
         result = await self.session.execute(query)
         return list(result.scalars().all())
 
