@@ -2,6 +2,7 @@ from aiogram import Router, F
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
+from aiogram.filters import StateFilter
 from sqlalchemy.ext.asyncio import AsyncSession
 from services.category_service import CategoryService
 from keyboards.reply import get_main_menu_keyboard, get_admin_cancel_keyboard
@@ -42,6 +43,15 @@ async def admin_categories_menu(message: Message, session: AsyncSession, _, lang
         I18N.get("admin_cat_list_header", lang).format(count=len(cats), lines=lines),
         parse_mode="HTML",
         reply_markup=_admin_cat_menu(lang)
+    )
+
+@router.message(StateFilter(None), F.from_user.id.in_(CONFIG.admin_ids), F.text.in_(I18N.get_all("admin_btn_cancel")))
+async def admin_cat_cancel_main(message: Message, state: FSMContext, _, lang):
+    """Handle 'Cancel' button from the category actions menu (State=None)"""
+    await state.clear()
+    await message.answer(
+        I18N.get(AdminKeys.CANCELLED, lang),
+        reply_markup=get_main_menu_keyboard(lang, True)
     )
 
 # ──────────────────── ADD FLOW ────────────────────────────────
