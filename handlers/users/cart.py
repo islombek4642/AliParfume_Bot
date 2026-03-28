@@ -226,24 +226,67 @@ async def checkout_confirm_final(message: Message, state: FSMContext, session: A
     # Send to Channel
     try:
         from utils.timezone import get_now
+        from aiogram.types import MessageEntity, User as TgUser
+
         current_time = get_now().strftime("%d.%m.%Y %H:%M")
-        
-        channel_msg = I18N.get("order_success_channel", "uz").format(
-            time=current_time,
-            name=user.full_name,
-            user_id=message.from_user.id,
-            phone=user.phone,
-            address=address,
-            items=items_text,
-            total=f"{total_price:,.0f}"
-        )
-        if hasattr(CONFIG, 'CHANNEL_ID') and CONFIG.CHANNEL_ID:
-            await bot.send_message(
-                CONFIG.CHANNEL_ID,
-                channel_msg,
-                parse_mode="HTML",
-                reply_markup=get_order_admin_keyboard(order_obj.id)
+        tg_user = message.from_user
+        full_name = user.full_name or "Foydalanuvchi"
+
+        address_display = address or "Ko'rsatilmagan"
+
+        # Fixed channel message template (no HTML in plain version)
+        def build_text(name_inline: str) -> str:
+            return (
+                f"📦 YANGI BUYURTMA!\n\n"
+                f"🕰 Vaqt: {current_time}\n"
+                f"👤 Mijoz: {name_inline}\n"
+                f"📞 Tel: {user.phone}\n"
+                f"📍 Manzil: {address_display}\n\n"
+                f"🛍 Mahsulotlar:\n{items_text}\n\n"
+                f"💰 Jami: {total_price:,.0f} so'm\n"
+                f"💳 To'lov: Naqd/Karta (Yuzma-yuz)"
             )
+
+        def utf16_len(s: str) -> int:
+            """Telegram uses UTF-16 code units for entity offsets."""
+            return len(s.encode("utf-16-le")) // 2
+
+        if hasattr(CONFIG, "CHANNEL_ID") and CONFIG.CHANNEL_ID:
+            if tg_user.username:
+                # ✅ User has @username — always visible to everyone
+                channel_text = build_text(f"@{tg_user.username} ({full_name})")
+                await bot.send_message(
+                    CONFIG.CHANNEL_ID,
+                    channel_text,
+                    reply_markup=get_order_admin_keyboard(order_obj.id)
+                )
+            else:
+                # ✅ No username — use text_mention entity (works for any bot user)
+                prefix = (
+                    f"📦 YANGI BUYURTMA!\n\n"
+                    f"🕰 Vaqt: {current_time}\n"
+                    f"👤 Mijoz: "
+                )
+                suffix = (
+                    f"\n📞 Tel: {user.phone}\n"
+                    f"📍 Manzil: {address_display}\n\n"
+                    f"🛍 Mahsulotlar:\n{items_text}\n\n"
+                    f"💰 Jami: {total_price:,.0f} so'm\n"
+                    f"💳 To'lov: Naqd/Karta (Yuzma-yuz)"
+                )
+                channel_text = prefix + full_name + suffix
+                mention = MessageEntity(
+                    type="text_mention",
+                    offset=utf16_len(prefix),
+                    length=utf16_len(full_name),
+                    user=TgUser(id=tg_user.id, is_bot=False, first_name=full_name)
+                )
+                await bot.send_message(
+                    CONFIG.CHANNEL_ID,
+                    channel_text,
+                    entities=[mention],
+                    reply_markup=get_order_admin_keyboard(order_obj.id)
+                )
     except Exception as e:
         import logging
         logging.error(f"⚠️ Buyurtmani kanalga yuborishda xatolik: {e}")
