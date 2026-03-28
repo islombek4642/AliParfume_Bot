@@ -17,6 +17,11 @@ class CartState(StatesGroup):
     waiting_for_quantity = State()
     waiting_for_delete = State()
 
+class CheckoutState(StatesGroup):
+    waiting_for_address = State()
+    waiting_for_confirmation = State()
+
+
 @router.message(F.text.startswith("🛒"), ~F.text.in_(I18N.get_all(MenuKeys.CART)))
 async def start_add_to_cart(message: Message, state: FSMContext, session: AsyncSession, _, lang):
     product_service = ProductService(session)
@@ -83,17 +88,88 @@ async def cmd_clear_cart(message: Message, session: AsyncSession, _, lang):
     await message.answer(_("cart_empty"), reply_markup=get_main_menu_keyboard(lang, is_admin))
 
 @router.message(F.text.in_(I18N.get_all("btn_order_confirm")))
-async def confirm_order(message: Message, session: AsyncSession, bot: Bot, _, lang):
+async def checkout_start(message: Message, state: FSMContext, session: AsyncSession, _, lang):
+    user_service = UserService(session)
+    user = await user_service.get_by_id(message.from_user.id)
+    if not user or not user.cart:
+        await message.answer(_("cart_empty"))
+        return
+    
+    from keyboards.reply import get_location_keyboard
+    await state.set_state(CheckoutState.waiting_for_address)
+    await message.answer(_("checkout_ask_address"), reply_markup=get_location_keyboard(lang))
+
+@router.message(CheckoutState.waiting_for_address)
+async def checkout_process_address(message: Message, state: FSMContext, session: AsyncSession, _, lang):
+    from keyboards.reply import get_main_menu_keyboard, get_checkout_keyboard
+    
+    if message.text and message.text in I18N.get_all("btn_cancel_checkout"):
+        await state.clear()
+        is_admin = CONFIG.is_admin(message.from_user.id)
+        await message.answer(_("checkout_cancelled"), reply_markup=get_main_menu_keyboard(lang, is_admin))
+        return
+
+    address = ""
+    if message.location:
+        address = f"<a href='https://maps.google.com/?q={message.location.latitude},{message.location.longitude}'>📍 Xaritada ko'rish</a>"
+    elif message.text:
+        address = message.text
+    else:
+        await message.answer(_("checkout_ask_address"))
+        return
+
+    await state.update_data(address=address)
+
+    user_service = UserService(session)
+    product_service = ProductService(session)
+    user = await user_service.get_by_id(message.from_user.id)
+    
+    items_text = ""
+    total_price = 0
+    for product_id_str, quantity in user.cart.items():
+        product = await product_service.get_by_id(int(product_id_str))
+        if product:
+            name = product.name_uz if lang == "uz" else product.name_ru
+            price = product.price * quantity
+            total_price += price
+            items_text += f"- {name} (x{quantity}) = {price:,.0f} so'm\n"
+
+    invoice = _("checkout_invoice").format(
+        items=items_text,
+        address=address,
+        total=f"{total_price:,.0f}" if total_price.is_integer() else f"{total_price:,}"
+    )
+
+    await state.set_state(CheckoutState.waiting_for_confirmation)
+    await message.answer(invoice, parse_mode="HTML", reply_markup=get_checkout_keyboard(lang))
+
+@router.message(CheckoutState.waiting_for_confirmation)
+async def checkout_confirm_final(message: Message, state: FSMContext, session: AsyncSession, bot: Bot, _, lang):
+    from keyboards.reply import get_main_menu_keyboard
+    
+    if message.text in I18N.get_all("btn_cancel_checkout"):
+        await state.clear()
+        is_admin = CONFIG.is_admin(message.from_user.id)
+        await message.answer(_("checkout_cancelled"), reply_markup=get_main_menu_keyboard(lang, is_admin))
+        return
+
+    if message.text not in I18N.get_all("btn_order_confirm"):
+        await message.answer(_("checkout_confirm_prompt"))
+        return
+
     user_service = UserService(session)
     product_service = ProductService(session)
     order_service = OrderService(session)
     
     user = await user_service.get_by_id(message.from_user.id)
     if not user or not user.cart:
+        await state.clear()
         await message.answer(_("cart_empty"))
         return
 
-    # Calculate total and prepare items text
+    data = await state.get_data()
+    address = data.get("address", "Belgilanmagan")
+
     items_text = ""
     total_price = 0
     for product_id_str, quantity in user.cart.items():
@@ -104,26 +180,28 @@ async def confirm_order(message: Message, session: AsyncSession, bot: Bot, _, la
             total_price += price
             items_text += f"- {name} (x{quantity})\n"
 
-    # Create order in DB
-    await order_service.create(user.id, user.cart, total_price)
+    # Create order in DB with address
+    await order_service.create(user.id, user.cart, total_price, address=address)
     
     # Send to Channel
     try:
         channel_msg = I18N.get("order_success_channel", "uz").format(
             name=user.full_name,
+            user_id=message.from_user.id,
             phone=user.phone,
+            address=address,
             items=items_text,
             total=f"{total_price:,.0f}" if total_price.is_integer() else f"{total_price:,}"
         )
         if hasattr(CONFIG, 'CHANNEL_ID') and CONFIG.CHANNEL_ID:
-            await bot.send_message(CONFIG.CHANNEL_ID, channel_msg)
+            await bot.send_message(CONFIG.CHANNEL_ID, channel_msg, parse_mode="HTML")
     except Exception as e:
         import logging
-        logging.error(f"⚠️ Buyurtmani kanalga yuborishda xatolik: {e}. Bot kanalda admin ekanligini yoki CHANNEL_ID to'g'riligini tekshiring.")
-
+        logging.error(f"⚠️ Buyurtmani kanalga yuborishda xatolik: {e}")
 
     # Clear Cart
     await user_service.clear_cart(message.from_user.id)
+    await state.clear()
     
     is_admin = CONFIG.is_admin(message.from_user.id)
     await message.answer(_("order_forwarded"), reply_markup=get_main_menu_keyboard(lang, is_admin))

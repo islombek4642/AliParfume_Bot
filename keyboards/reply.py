@@ -111,5 +111,20 @@ def get_confirmation_keyboard(lang: str) -> ReplyKeyboardMarkup:
         resize_keyboard=True,
         one_time_keyboard=True
     )
+def get_location_keyboard(lang: str) -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text=I18N.get("btn_send_location", lang), request_location=True)],
+            [KeyboardButton(text=I18N.get("btn_cancel_checkout", lang))]
+        ],
+        resize_keyboard=True
+    )
 
-
+def get_checkout_keyboard(lang: str) -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text=I18N.get("btn_order_confirm", lang))],
+            [KeyboardButton(text=I18N.get("btn_cancel_checkout", lang))]
+        ],
+        resize_keyboard=True
+    )

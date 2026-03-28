@@ -61,5 +61,12 @@
   "btn_prev": "⬅️ Oldingi",
   "btn_next": "Keyingi ➡️",
   "btn_buy_inline": "🛒 Sotib olish",
-  "product_count": "Mahsulot {current} / {total}"
+  "product_count": "Mahsulot {current} / {total}",
+  "checkout_ask_address": "🚚 Iltimos, yetkazib berish manzilingizni to'liq nomini yozib yuboring yakunlash uchun (masalan: Chilonzor...)\n\nYoki pastdagi tugmani bosib 📍 Lokatsiyangizni yuboring:",
+  "btn_send_location": "📍 Lokatsiyani yuborish",
+  "btn_cancel_checkout": "❌ Bekor qilish",
+  "checkout_cancelled": "🛑 Xarid bekor qilindi. Savatchangizdagi mahsulotlar saqlanib qoldi.",
+  "checkout_invoice": "🧾 SIZNING BUYURTMANGIZ:\n\n{items}\n----------------------\n📍 Yetkazib berish manzili: {address}\n💰 Jami to'lov: {total} so'm\n\nTo'lov turi: Xarid qabul qilinganda.",
+  "checkout_confirm_prompt": "Buyurtmani tasdiqlaysizmi?",
+  "order_success_channel": "📦 YANGI BUYURTMA!\n\n👤 Mijoz: {name} (<a href='tg://user?id={user_id}'>Profilga o'tish</a>)\n📞 Tel: {phone}\n📍 Manzil: {address}\n\n🛍 Mahsulotlar:\n{items}\n\n💰 Jami: {total} so'm\n💳 To'lov: Naqd/Karta (Yuzma-yuz)"
 }

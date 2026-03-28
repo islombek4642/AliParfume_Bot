@@ -61,5 +61,12 @@
   "btn_prev": "⬅️ Назад",
   "btn_next": "Вперед ➡️",
   "btn_buy_inline": "🛒 Купить",
-  "product_count": "Товар {current} / {total}"
+  "product_count": "Товар {current} / {total}",
+  "checkout_ask_address": "🚚 Пожалуйста, введите полный адрес доставки для завершения заказа (например: Чиланзар...)\n\nИли нажмите кнопку ниже, чтобы отправить 📍 Локацию:",
+  "btn_send_location": "📍 Отправить локацию",
+  "btn_cancel_checkout": "❌ Отменить",
+  "checkout_cancelled": "🛑 Покупка отменена. Товары в вашей корзине сохранены.",
+  "checkout_invoice": "🧾 ВАШ ЗАКАЗ:\n\n{items}\n----------------------\n📍 Адрес доставки: {address}\n💰 Итого к оплате: {total} сум\n\nТип оплаты: При получении.",
+  "checkout_confirm_prompt": "Подтверждаете заказ?",
+  "order_success_channel": "📦 НОВЫЙ ЗАКАЗ!\n\n👤 Клиент: {name} (<a href='tg://user?id={user_id}'>Профиль</a>)\n📞 Тел: {phone}\n📍 Адрес: {address}\n\n🛍 Товары:\n{items}\n\n💰 Итого: {total} сум\n💳 Оплата: Наличные/Карта (При встрече)"
 }
