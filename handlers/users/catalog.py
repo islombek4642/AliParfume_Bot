@@ -101,6 +101,10 @@ async def handle_pagination(callback: types.CallbackQuery, session: AsyncSession
     
     await callback.answer()
 
+@router.callback_query(F.data == "noop")
+async def handle_noop(callback: types.CallbackQuery):
+    await callback.answer()
+
 @router.callback_query(F.data == "back_to_cats")
 async def handle_back_to_cats(callback: types.CallbackQuery, session: AsyncSession, _, lang):
     category_service = CategoryService(session)
