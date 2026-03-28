@@ -1,4 +1,4 @@
-from aiogram import Router, F, Bot
+from aiogram import Router, F, Bot, types
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
@@ -28,6 +28,15 @@ async def start_add_to_cart(message: Message, state: FSMContext, session: AsyncS
         await state.update_data(product_id=product.id)
         await state.set_state(CartState.waiting_for_quantity)
         await message.answer(_("select_quantity"), reply_markup=get_quantity_keyboard(lang))
+@router.callback_query(F.data.startswith("buy_inline:"))
+async def start_add_to_cart_inline(callback: types.CallbackQuery, state: FSMContext, session: AsyncSession, _, lang):
+    product_id = int(callback.data.split(":")[1])
+    await state.update_data(product_id=product_id)
+    await state.set_state(CartState.waiting_for_quantity)
+    
+    # We delete the original inline message to keep things clean or just answer
+    await callback.message.answer(_("select_quantity"), reply_markup=get_quantity_keyboard(lang))
+    await callback.answer()
 
 @router.message(CartState.waiting_for_quantity, F.text.regexp(r"^\d+$"))
 async def set_quantity(message: Message, state: FSMContext, session: AsyncSession, _, lang):
