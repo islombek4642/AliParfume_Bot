@@ -90,7 +90,7 @@ async def perform_broadcast(message: Message, state: FSMContext, session: AsyncS
         except Exception:
             error_count += 1
             
-    is_admin = message.from_user.id == CONFIG.ADMIN_ID
+    is_admin = CONFIG.is_admin(message.from_user.id)
     await message.answer(
         _("admin_broadcast_summary").format(
             total=len(users),

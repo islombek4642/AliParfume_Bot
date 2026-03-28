@@ -49,7 +49,7 @@ async def cmd_settings(message: Message, _, lang):
 @router.message(Command("about"))
 @router.message(F.text.in_(I18N.get_all("btn_about")))
 async def cmd_about(message: Message, _):
-    await message.answer(_("btn_about"))
+    await message.answer(_("about_text"))
 
 # Language handling
 @router.message(F.text.in_(I18N.get_all("lang_uz")))

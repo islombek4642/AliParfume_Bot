@@ -17,7 +17,7 @@ class CartState(StatesGroup):
     waiting_for_quantity = State()
     waiting_for_delete = State()
 
-@router.message(F.text.startswith("🛒"))
+@router.message(F.text.startswith("🛒"), ~F.text.in_(I18N.get_all(MenuKeys.CART)))
 async def start_add_to_cart(message: Message, state: FSMContext, session: AsyncSession, _, lang):
     product_service = ProductService(session)
     product_name = message.text.replace("🛒 ", "")

@@ -55,13 +55,13 @@ async def main():
     dp.update.middleware(DbSessionMiddleware(AsyncSessionLocal))
     dp.update.middleware(I18nMiddleware())
 
-    # Register Routers
+    # Register Routers (Ordered by priority)
+    dp.include_router(panel.router)
+    dp.include_router(products.router)
+    dp.include_router(cart.router)
     dp.include_router(start.router)
     dp.include_router(catalog.router)
-    dp.include_router(cart.router)
-    dp.include_router(panel.router)
     dp.include_router(utils.router)
-    dp.include_router(products.router)
 
     # Start Polling
     logging.info("Starting bot...")
