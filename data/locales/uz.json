@@ -103,5 +103,11 @@
   "order_dm_processing": "📦 #{id}-raqamli buyurtmangiz qabul qilindi va tayyorlanmoqda!",
   "order_dm_shipped": "🚚 #{id}-raqamli buyurtmangiz yetkazib berishga chiqdi!",
   "order_dm_completed": "✅ #{id}-raqamli buyurtmangiz muvaffaqiyatli yetkazildi! Rahmat 🙏",
-  "order_dm_cancelled": "❌ #{id}-raqamli buyurtmangiz bekor qilindi. Savollaringiz bo'lsa murojaat qiling."
+  "order_dm_cancelled": "❌ #{id}-raqamli buyurtmangiz bekor qilindi. Savollaringiz bo'lsa murojaat qiling.",
+
+  "order_status_pending": "🟡 Kutilmoqda",
+  "order_status_processing_user": "📦 Tayyorlanmoqda",
+  "order_status_shipped_user": "🚚 Yo'lda",
+  "order_status_completed_user": "✅ Yetkazildi",
+  "order_status_cancelled_user": "❌ Bekor qilindi"
 }

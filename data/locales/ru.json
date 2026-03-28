@@ -104,5 +104,11 @@
   "order_dm_processing": "📦 Ваш заказ №{id} принят и готовится!",
   "order_dm_shipped": "🚚 Ваш заказ №{id} отправлен в доставку!",
   "order_dm_completed": "✅ Ваш заказ №{id} успешно доставлен! Спасибо за покупку 🙏",
-  "order_dm_cancelled": "❌ Ваш заказ №{id} был отменён. Свяжитесь с нами при наличии вопросов."
+  "order_dm_cancelled": "❌ Ваш заказ №{id} был отменён. Свяжитесь с нами при наличии вопросов.",
+
+  "order_status_pending": "🟡 Ожидание",
+  "order_status_processing_user": "📦 Готовится",
+  "order_status_shipped_user": "🚚 В пути",
+  "order_status_completed_user": "✅ Доставлен",
+  "order_status_cancelled_user": "❌ Отменён"
 }

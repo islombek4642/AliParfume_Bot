@@ -298,20 +298,12 @@ async def _send_order_page(message_or_callback, orders, index: int, product_serv
     order = orders[index]
 
     STATUS_DISPLAY = {
-        "pending":    "🟡 Kutilmoqda",
-        "processing": "📦 Tayyorlanmoqda",
-        "shipped":    "🚚 Yo'lda",
-        "completed":  "✅ Yetkazildi",
-        "cancelled":  "❌ Bekor qilindi",
+        "pending":    I18N.get("order_status_pending",    lang),
+        "processing": I18N.get("order_status_processing_user", lang),
+        "shipped":    I18N.get("order_status_shipped_user",    lang),
+        "completed":  I18N.get("order_status_completed_user",  lang),
+        "cancelled":  I18N.get("order_status_cancelled_user",  lang),
     }
-    if lang == "ru":
-        STATUS_DISPLAY = {
-            "pending":    "🟡 Ожидание",
-            "processing": "📦 Готовится",
-            "shipped":    "🚚 В пути",
-            "completed":  "✅ Доставлен",
-            "cancelled":  "❌ Отменён",
-        }
 
     date_str = order.created_at.strftime("%d.%m.%Y %H:%M")
     status = STATUS_DISPLAY.get(order.status, order.status)
@@ -345,9 +337,15 @@ async def _send_order_page(message_or_callback, orders, index: int, product_serv
     keyboard = get_my_orders_keyboard(orders, index)
 
     if edit:
-        await message_or_callback.message.edit_text(text, parse_mode="HTML", reply_markup=keyboard)
+        await message_or_callback.message.edit_text(
+            text, parse_mode="HTML", reply_markup=keyboard,
+            disable_web_page_preview=True
+        )
     else:
-        await message_or_callback.answer(text, parse_mode="HTML", reply_markup=keyboard)
+        await message_or_callback.answer(
+            text, parse_mode="HTML", reply_markup=keyboard,
+            disable_web_page_preview=True
+        )
 
 
 @router.callback_query(F.data.startswith("my_orders:"))
