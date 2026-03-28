@@ -6,6 +6,7 @@ from services.user_service import UserService
 from services.product_service import ProductService
 from services.order_service import OrderService
 from keyboards.reply import get_quantity_keyboard, get_main_menu_keyboard, get_cart_keyboard, get_cart_delete_keyboard
+from keyboards.inline import get_order_admin_keyboard, get_my_orders_keyboard
 from utils.localization import I18N
 from data.config import CONFIG
 from data.constants import MenuKeys
@@ -197,7 +198,7 @@ async def checkout_confirm_final(message: Message, state: FSMContext, session: A
             items_text += f"- {name} (x{quantity})\n"
 
     # Create order in DB with address
-    await order_service.create(user.id, user.cart, total_price, address=address)
+    order_obj = await order_service.create(user.id, user.cart, total_price, address=address)
     
     # Deduct stock for each item
     for product_id_str, quantity in user.cart.items():
@@ -215,10 +216,15 @@ async def checkout_confirm_final(message: Message, state: FSMContext, session: A
             phone=user.phone,
             address=address,
             items=items_text,
-            total=f"{total_price:,.0f}" if total_price.is_integer() else f"{total_price:,}"
+            total=f"{total_price:,.0f}"
         )
         if hasattr(CONFIG, 'CHANNEL_ID') and CONFIG.CHANNEL_ID:
-            await bot.send_message(CONFIG.CHANNEL_ID, channel_msg, parse_mode="HTML")
+            await bot.send_message(
+                CONFIG.CHANNEL_ID,
+                channel_msg,
+                parse_mode="HTML",
+                reply_markup=get_order_admin_keyboard(order_obj.id)
+            )
     except Exception as e:
         import logging
         logging.error(f"⚠️ Buyurtmani kanalga yuborishda xatolik: {e}")
@@ -234,6 +240,7 @@ async def checkout_confirm_final(message: Message, state: FSMContext, session: A
 async def cmd_my_orders(message: Message, session: AsyncSession, _, lang):
     user_service = UserService(session)
     order_service = OrderService(session)
+    product_service = ProductService(session)
     
     user = await user_service.get_by_id(message.from_user.id)
     orders = await order_service.get_user_orders(user.id)
@@ -241,18 +248,83 @@ async def cmd_my_orders(message: Message, session: AsyncSession, _, lang):
     if not orders:
         await message.answer(_("cart_empty"))
         return
-
-    text = _("history_header")
-    for order in orders[:10]: # Show last 10 orders
-        date_str = order.created_at.strftime("%Y-%m-%d %H:%M")
-        text += _("order_item").format(
-            id=order.id,
-            date=date_str,
-            status=order.status,
-            total=f"{order.total_price:,}"
-        )
     
-    await message.answer(text)
+    await _send_order_page(message, orders, 0, product_service, lang)
+
+
+async def _send_order_page(message_or_callback, orders, index: int, product_service, lang: str, edit: bool = False):
+    """Render a single order as a detailed card."""
+    order = orders[index]
+
+    STATUS_DISPLAY = {
+        "pending":    "🟡 Kutilmoqda",
+        "processing": "📦 Tayyorlanmoqda",
+        "shipped":    "🚚 Yo'lda",
+        "completed":  "✅ Yetkazildi",
+        "cancelled":  "❌ Bekor qilindi",
+    }
+    if lang == "ru":
+        STATUS_DISPLAY = {
+            "pending":    "🟡 Ожидание",
+            "processing": "📦 Готовится",
+            "shipped":    "🚚 В пути",
+            "completed":  "✅ Доставлен",
+            "cancelled":  "❌ Отменён",
+        }
+
+    date_str = order.created_at.strftime("%d.%m.%Y %H:%M")
+    status = STATUS_DISPLAY.get(order.status, order.status)
+    address = order.address or ("Ko'rsatilmagan" if lang == "uz" else "Не указан")
+
+    items_text = ""
+    if order.items:
+        for product_id_str, quantity in order.items.items():
+            product = await product_service.get_by_id(int(product_id_str))
+            if product:
+                name = product.name_uz if lang == "uz" else product.name_ru
+                price = product.price * quantity
+                items_text += f"  • {name} x{quantity} = {price:,.0f} so'm\n"
+
+    text = (
+        f"📋 <b>Buyurtma #{order.id}</b>\n"
+        f"📅 {date_str}\n"
+        f"📌 {status}\n"
+        f"📍 {address}\n\n"
+        f"🛍 Mahsulotlar:\n{items_text or ' — '}\n"
+        f"💰 Jami: <b>{order.total_price:,.0f} so'm</b>"
+    ) if lang == "uz" else (
+        f"📋 <b>Заказ #{order.id}</b>\n"
+        f"📅 {date_str}\n"
+        f"📌 {status}\n"
+        f"📍 {address}\n\n"
+        f"🛍 Товары:\n{items_text or ' — '}\n"
+        f"💰 Итого: <b>{order.total_price:,.0f} сум</b>"
+    )
+
+    keyboard = get_my_orders_keyboard(orders, index)
+
+    if edit:
+        await message_or_callback.message.edit_text(text, parse_mode="HTML", reply_markup=keyboard)
+    else:
+        await message_or_callback.answer(text, parse_mode="HTML", reply_markup=keyboard)
+
+
+@router.callback_query(F.data.startswith("my_orders:"))
+async def my_orders_page(callback: types.CallbackQuery, session: AsyncSession, _, lang):
+    index = int(callback.data.split(":")[1])
+    user_service = UserService(session)
+    order_service = OrderService(session)
+    product_service = ProductService(session)
+
+    user = await user_service.get_by_id(callback.from_user.id)
+    orders = await order_service.get_user_orders(user.id)
+
+    if not orders or index >= len(orders):
+        await callback.answer()
+        return
+
+    await _send_order_page(callback, orders, index, product_service, lang, edit=True)
+    await callback.answer()
 
 @router.message(F.text.in_(I18N.get_all("btn_cart_delete")))
 async def cmd_cart_delete_start(message: Message, state: FSMContext, session: AsyncSession, _, lang):

@@ -18,6 +18,19 @@ class OrderService:
         result = await self.session.execute(query)
         return list(result.scalars().all())
 
+    async def get_by_id(self, order_id: int) -> Order | None:
+        query = select(Order).where(Order.id == order_id)
+        result = await self.session.execute(query)
+        return result.scalar_one_or_none()
+
+    async def update_status(self, order_id: int, new_status: str) -> Order | None:
+        from sqlalchemy import update
+        await self.session.execute(
+            update(Order).where(Order.id == order_id).values(status=new_status)
+        )
+        await self.session.commit()
+        return await self.get_by_id(order_id)
+
     async def get_stats(self) -> Tuple[int, int, float]:
         user_count = (await self.session.execute(select(func.count(User.id)))).scalar()
         order_count = (await self.session.execute(select(func.count(Order.id)))).scalar()
