@@ -108,13 +108,19 @@ async def confirm_order(message: Message, session: AsyncSession, bot: Bot, _, la
     await order_service.create(user.id, user.cart, total_price)
     
     # Send to Channel
-    channel_msg = I18N.get("order_success_channel", "uz").format(
-        name=user.full_name,
-        phone=user.phone,
-        items=items_text,
-        total=f"{total_price:,}"
-    )
-    await bot.send_message(CONFIG.CHANNEL_ID, channel_msg)
+    try:
+        channel_msg = I18N.get("order_success_channel", "uz").format(
+            name=user.full_name,
+            phone=user.phone,
+            items=items_text,
+            total=f"{total_price:,.0f}" if total_price.is_integer() else f"{total_price:,}"
+        )
+        if hasattr(CONFIG, 'CHANNEL_ID') and CONFIG.CHANNEL_ID:
+            await bot.send_message(CONFIG.CHANNEL_ID, channel_msg)
+    except Exception as e:
+        import logging
+        logging.error(f"⚠️ Buyurtmani kanalga yuborishda xatolik: {e}. Bot kanalda admin ekanligini yoki CHANNEL_ID to'g'riligini tekshiring.")
+
 
     # Clear Cart
     await user_service.clear_cart(message.from_user.id)
