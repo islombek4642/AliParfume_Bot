@@ -28,6 +28,12 @@ async def start_add_product(message: Message, state: FSMContext, session: AsyncS
     await state.set_state(AddProductState.waiting_for_category)
     await message.answer(_("admin_prompt_cat"), reply_markup=get_categories_keyboard(lang, categories))
 
+@router.message(AddProductState(), F.text.in_(I18N.get_all("btn_back") + I18N.get_all("admin_btn_cancel") + I18N.get_all("btn_main")))
+async def cancel_add_product_state(message: Message, state: FSMContext, _, lang):
+    await state.clear()
+    is_admin = CONFIG.is_admin(message.from_user.id)
+    await message.answer(_("main_menu"), reply_markup=get_main_menu_keyboard(lang, is_admin))
+
 @router.message(AddProductState.waiting_for_category)
 async def process_category(message: Message, state: FSMContext, session: AsyncSession, _, lang):
     category_service = CategoryService(session)
