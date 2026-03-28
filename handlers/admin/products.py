@@ -92,5 +92,6 @@ async def process_photo(message: Message, state: FSMContext, session: AsyncSessi
         photo_id
     )
     
-    await message.answer(_("admin_add_success"), reply_markup=get_main_menu_keyboard(lang, is_admin=True))
+    is_admin = CONFIG.is_admin(message.from_user.id)
+    await message.answer(_("admin_add_success"), reply_markup=get_main_menu_keyboard(lang, is_admin=is_admin))
     await state.clear()

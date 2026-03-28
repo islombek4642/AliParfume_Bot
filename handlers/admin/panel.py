@@ -57,7 +57,7 @@ async def preview_broadcast(message: Message, state: FSMContext, session: AsyncS
 @router.message(BroadcastState.waiting_for_confirmation, F.text.in_(I18N.get_all("admin_btn_no")))
 async def cancel_broadcast(message: Message, state: FSMContext, _, lang):
     await state.clear()
-    is_admin = message.from_user.id == CONFIG.ADMIN_ID
+    is_admin = CONFIG.is_admin(message.from_user.id)
     await message.answer(_("admin_broadcast_cancelled"), reply_markup=get_main_menu_keyboard(lang, is_admin))
 
 @router.message(BroadcastState.waiting_for_confirmation, F.text.in_(I18N.get_all("admin_btn_yes")))
