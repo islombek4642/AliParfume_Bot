@@ -87,7 +87,9 @@ async def cmd_clear_cart(message: Message, session: AsyncSession, _, lang):
     is_admin = CONFIG.is_admin(message.from_user.id)
     await message.answer(_("cart_empty"), reply_markup=get_main_menu_keyboard(lang, is_admin))
 
-@router.message(F.text.in_(I18N.get_all("btn_order_confirm")))
+from aiogram.filters import StateFilter
+
+@router.message(StateFilter(None), F.text.in_(I18N.get_all("btn_order_confirm")))
 async def checkout_start(message: Message, state: FSMContext, session: AsyncSession, _, lang):
     user_service = UserService(session)
     user = await user_service.get_by_id(message.from_user.id)
