@@ -40,13 +40,6 @@ $DOCKER_CMD down
 echo -e "${GREEN}🏗️  Yangi obrazlarni qurish va ishga tushirish...${NC}"
 $DOCKER_CMD up --build -d
 
-# 4. Ma'lumotlar bazasini sozlash (Seeding)
-echo -e "${GREEN}⏳ Ma'lumotlar bazasi tayyor bo'lishini kutish (7 soniya)...${NC}"
-sleep 7
-
-echo -e "${GREEN}📦 Kategoriyalarni tekshirish va ma'lumotlarni kiritish...${NC}"
-$DOCKER_CMD exec bot python -m utils.init_data
-
 echo -e "\n${GREEN}✅ Bot muvaffaqiyatli ishga tushirildi!${NC}"
 echo -e "📝 Loglarni kuzatish: ${YELLOW}$DOCKER_CMD logs -f bot${NC}"
 echo -e "🛑 To'xtatish uchun: ${YELLOW}$DOCKER_CMD down${NC}"
