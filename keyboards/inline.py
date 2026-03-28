@@ -51,15 +51,16 @@ _ORDER_STATUS_FLOW = {
 }
 
 def get_order_admin_keyboard(order_id: int, current_status: str = "pending") -> InlineKeyboardMarkup | None:
-    """Sequential 2-button keyboard for admin order management in the channel."""
+    """Sequential vertical keyboard for admin order management in the channel."""
     steps = _ORDER_STATUS_FLOW.get(current_status, [])
     if not steps:
         return None
-    row = [
-        InlineKeyboardButton(text=label, callback_data=f"order_status:{order_id}:{next_s}")
+    # Each button gets its own row — vertical layout
+    buttons = [
+        [InlineKeyboardButton(text=label, callback_data=f"order_status:{order_id}:{next_s}")]
         for label, next_s in steps
     ]
-    return InlineKeyboardMarkup(inline_keyboard=[row])
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
 
