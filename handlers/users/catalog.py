@@ -9,6 +9,8 @@ from data.constants import MenuKeys
 from data.config import CONFIG
 from sqlalchemy.ext.asyncio import AsyncSession
 
+DEFAULT_PHOTO = "https://placehold.co/600x400/f5f5f5/999999.png?text=AliParfume\nRasm+Yo'q"
+
 router = Router()
 
 @router.message(F.text.in_(I18N.get_all(MenuKeys.CATALOG)))
@@ -60,10 +62,9 @@ async def handle_category_selection(message: Message, session: AsyncSession, _, 
         
         reply_markup = get_product_inline_keyboard(lang, selected_category.id, 0, len(products), product.id)
         
-        if product.photo_id:
-            await message.answer_photo(product.photo_id, caption=caption, parse_mode="HTML", reply_markup=reply_markup)
-        else:
-            await message.answer(caption, parse_mode="HTML", reply_markup=reply_markup)
+        photo = product.photo_id if product.photo_id else DEFAULT_PHOTO
+        await message.answer_photo(photo, caption=caption, parse_mode="HTML", reply_markup=reply_markup)
+
 
 @router.callback_query(F.data.startswith("prod_page:"))
 async def handle_pagination(callback: types.CallbackQuery, session: AsyncSession, _, lang):
@@ -89,24 +90,14 @@ async def handle_pagination(callback: types.CallbackQuery, session: AsyncSession
     reply_markup = get_product_inline_keyboard(lang, category_id, index, len(products), product.id)
     
     try:
-        current_has_media = bool(callback.message.photo)
-        new_has_media = bool(product.photo_id)
-        
-        if current_has_media and new_has_media:
-            await callback.message.edit_media(
-                media=types.InputMediaPhoto(media=product.photo_id, caption=caption, parse_mode="HTML"),
-                reply_markup=reply_markup
-            )
-        elif not current_has_media and not new_has_media:
-            await callback.message.edit_text(text=caption, parse_mode="HTML", reply_markup=reply_markup)
-        else:
-            await callback.message.delete()
-            if new_has_media:
-                await callback.message.answer_photo(product.photo_id, caption=caption, parse_mode="HTML", reply_markup=reply_markup)
-            else:
-                await callback.message.answer(caption, parse_mode="HTML", reply_markup=reply_markup)
+        photo = product.photo_id if product.photo_id else DEFAULT_PHOTO
+        await callback.message.edit_media(
+            media=types.InputMediaPhoto(media=photo, caption=caption, parse_mode="HTML"),
+            reply_markup=reply_markup
+        )
     except Exception as e:
         print(f"Pagination error: {e}")
+
     
     await callback.answer()
 
