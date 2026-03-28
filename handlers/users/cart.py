@@ -53,7 +53,7 @@ async def set_quantity(message: Message, state: FSMContext, session: AsyncSessio
     if product_id:
         await user_service.add_to_cart(message.from_user.id, product_id, quantity)
         is_admin = CONFIG.is_admin(message.from_user.id)
-        await message.answer(_("auth_success"), reply_markup=get_main_menu_keyboard(lang, is_admin))
+        await message.answer(_("cart_add_success"), reply_markup=get_main_menu_keyboard(lang, is_admin))
         await state.clear()
 
 @router.message(F.text.in_(I18N.get_all(MenuKeys.CART)))
@@ -261,5 +261,5 @@ async def cmd_cart_delete_product(message: Message, state: FSMContext, session: 
     if product:
         await user_service.delete_from_cart(message.from_user.id, product.id)
         is_admin = CONFIG.is_admin(message.from_user.id)
-        await message.answer(_("auth_success"), reply_markup=get_main_menu_keyboard(lang, is_admin))
+        await message.answer(_("cart_delete_success"), reply_markup=get_main_menu_keyboard(lang, is_admin))
         await state.clear()

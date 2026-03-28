@@ -2,6 +2,8 @@
   "welcome": "Assalomu alaykum! AliParfume botiga xush kelibsiz. Davom etish uchun telefon raqamingizni yuboring:",
   "share_contact": "📲 Kontaktni ulashish",
   "auth_success": "Muvaffaqiyatli ro'yxatdan o'tdingiz!",
+  "cart_add_success": "Mahsulot savatga muvaffaqiyatli qo'shildi! 🛒",
+  "cart_delete_success": "Mahsulot savatchadan muvaffaqiyatli o'chirildi! 🗑",
   "main_menu": "Asosiy menyu:",
   "btn_catalog": "🛍 Katalog",
   "btn_cart": "🛒 Savatcha",
