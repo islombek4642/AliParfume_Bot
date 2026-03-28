@@ -64,7 +64,7 @@
   "btn_next": "Keyingi ➡️",
   "btn_buy_inline": "🛒 Sotib olish",
   "product_count": "Mahsulot {current} / {total}",
-  "checkout_ask_address": "🚚 Iltimos, yetkazib berish manzilingizni to'liq nomini yozib yuboring yakunlash uchun (masalan: Chilonzor...)\n\nYoki pastdagi tugmani bosib 📍 Lokatsiyangizni yuboring:",
+  "checkout_ask_address": "🚚 Iltimos, yetkazib berish manzilingizni to'liq nomini yozib yuboring yakunlash uchun (masalan: Chilonzor 3-kv...)\n\n📍 Yoki pastdagi tugmani bosib lokatsiyangizni yuboring:\n⚠️ *(Lokatsiya yuborishdan oldin telefoningizda GPS yoniq ekanligini tekshiring!)*",
   "btn_send_location": "📍 Lokatsiyani yuborish",
   "btn_cancel_checkout": "❌ Bekor qilish",
   "checkout_cancelled": "🛑 Xarid bekor qilindi. Savatchangizdagi mahsulotlar saqlanib qoldi.",
