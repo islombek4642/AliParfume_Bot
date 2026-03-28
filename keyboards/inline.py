@@ -38,18 +38,29 @@ def get_product_inline_keyboard(lang: str, category_id: int, current_index: int,
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def get_order_admin_keyboard(order_id: int) -> InlineKeyboardMarkup:
-    """Inline keyboard for admin channel order tickets — status management."""
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [
-            InlineKeyboardButton(text="📦 Qabul qilish", callback_data=f"order_status:{order_id}:processing"),
-            InlineKeyboardButton(text="🚚 Yo'lda", callback_data=f"order_status:{order_id}:shipped"),
-        ],
-        [
-            InlineKeyboardButton(text="✅ Yetkazildi", callback_data=f"order_status:{order_id}:completed"),
-            InlineKeyboardButton(text="❌ Bekor qilish", callback_data=f"order_status:{order_id}:cancelled"),
-        ]
-    ])
+
+# Sequential flow: each status → next possible actions
+_ORDER_STATUS_FLOW = {
+    "pending":    [("✅ Qabul qilish / Принять",    "processing"),
+                   ("❌ Bekor qilish / Отменить",   "cancelled")],
+    "processing": [("🚚 Yo'lda / В пути",           "shipped"),
+                   ("❌ Bekor qilish / Отменить",   "cancelled")],
+    "shipped":    [("✅ Yetkazildi / Доставлено",   "completed")],
+    "completed":  [],
+    "cancelled":  [],
+}
+
+def get_order_admin_keyboard(order_id: int, current_status: str = "pending") -> InlineKeyboardMarkup | None:
+    """Sequential 2-button keyboard for admin order management in the channel."""
+    steps = _ORDER_STATUS_FLOW.get(current_status, [])
+    if not steps:
+        return None
+    row = [
+        InlineKeyboardButton(text=label, callback_data=f"order_status:{order_id}:{next_s}")
+        for label, next_s in steps
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=[row])
+
 
 
 def get_my_orders_keyboard(orders: list, index: int) -> InlineKeyboardMarkup:

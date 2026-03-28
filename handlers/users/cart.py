@@ -203,15 +203,18 @@ async def checkout_confirm_final(message: Message, state: FSMContext, session: A
     # Deduct stock for each item + notify admin if stock hits 0
     for product_id_str, quantity in user.cart.items():
         await product_service.update_stock(int(product_id_str), -quantity)
-        # Check if stock is now 0 — alert admins
+        # Check if stock is now 0 — alert all admins
         try:
             updated_product = await product_service.get_by_id(int(product_id_str))
             if updated_product and updated_product.stock <= 0:
-                prod_name = updated_product.name_uz
+                prod_name_uz = updated_product.name_uz
+                prod_name_ru = updated_product.name_ru or prod_name_uz
                 alert_msg = (
-                    f"⚠️ OMBOR OGOHLANTIRISII!\n\n"
-                    f"📦 <b>{prod_name}</b> mahsuloti omborda tugadi!\n"
-                    f"Yangi partiya qo'shish uchun admin paneldan foydalaning."
+                    f"⚠️ <b>OMBOR OGOHLANTIRISHI / СКЛАД ПРЕДУПРЕЖДЕНИЕ</b>\n\n"
+                    f"📦 <b>{prod_name_uz}</b> (<i>{prod_name_ru}</i>) omborda tugadi!\n"
+                    f"Товар <b>{prod_name_ru}</b> закончился на складе!\n\n"
+                    f"🔧 Yangi partiya qo'shish uchun mahsulotni tahrirlang.\n"
+                    f"   Добавьте новый запас через панель."
                 )
                 for admin_id in CONFIG.admin_ids:
                     await bot.send_message(admin_id, alert_msg, parse_mode="HTML")
