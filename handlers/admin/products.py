@@ -44,43 +44,49 @@ async def process_category(message: Message, state: FSMContext, session: AsyncSe
         await message.answer(_("admin_prompt_cat")) # Retry
         return
         
+    from keyboards.reply import get_admin_cancel_keyboard
     await state.update_data(category_id=selected_category.id)
     await state.set_state(AddProductState.waiting_for_name_uz)
-    await message.answer(_("admin_prompt_name_uz"))
+    await message.answer(_("admin_prompt_name_uz"), reply_markup=get_admin_cancel_keyboard(lang))
 
 @router.message(AddProductState.waiting_for_name_uz)
-async def process_name_uz(message: Message, state: FSMContext, _):
+async def process_name_uz(message: Message, state: FSMContext, _, lang):
+    from keyboards.reply import get_admin_cancel_keyboard
     await state.update_data(name_uz=message.text)
     await state.set_state(AddProductState.waiting_for_name_ru)
-    await message.answer(_("admin_prompt_name_ru"))
+    await message.answer(_("admin_prompt_name_ru"), reply_markup=get_admin_cancel_keyboard(lang))
 
 @router.message(AddProductState.waiting_for_name_ru)
-async def process_name_ru(message: Message, state: FSMContext, _):
+async def process_name_ru(message: Message, state: FSMContext, _, lang):
+    from keyboards.reply import get_admin_cancel_keyboard
     await state.update_data(name_ru=message.text)
     await state.set_state(AddProductState.waiting_for_desc_uz)
-    await message.answer(_("admin_prompt_desc_uz"))
+    await message.answer(_("admin_prompt_desc_uz"), reply_markup=get_admin_cancel_keyboard(lang))
 
 @router.message(AddProductState.waiting_for_desc_uz)
-async def process_desc_uz(message: Message, state: FSMContext, _):
+async def process_desc_uz(message: Message, state: FSMContext, _, lang):
+    from keyboards.reply import get_admin_cancel_keyboard
     await state.update_data(desc_uz=message.text)
     await state.set_state(AddProductState.waiting_for_desc_ru)
-    await message.answer(_("admin_prompt_desc_ru"))
+    await message.answer(_("admin_prompt_desc_ru"), reply_markup=get_admin_cancel_keyboard(lang))
 
 @router.message(AddProductState.waiting_for_desc_ru)
-async def process_desc_ru(message: Message, state: FSMContext, _):
+async def process_desc_ru(message: Message, state: FSMContext, _, lang):
+    from keyboards.reply import get_admin_cancel_keyboard
     await state.update_data(desc_ru=message.text)
     await state.set_state(AddProductState.waiting_for_price)
-    await message.answer(_("admin_prompt_price"))
+    await message.answer(_("admin_prompt_price"), reply_markup=get_admin_cancel_keyboard(lang))
 
 @router.message(AddProductState.waiting_for_price)
-async def process_price(message: Message, state: FSMContext, _):
+async def process_price(message: Message, state: FSMContext, _, lang):
+    from keyboards.reply import get_admin_cancel_keyboard
     try:
         price = float(message.text)
         await state.update_data(price=price)
         await state.set_state(AddProductState.waiting_for_photo)
-        await message.answer(_("admin_prompt_photo"))
+        await message.answer(_("admin_prompt_photo"), reply_markup=get_admin_cancel_keyboard(lang))
     except ValueError:
-        await message.answer(_("admin_prompt_price")) # Retry
+        await message.answer(_("admin_prompt_price"), reply_markup=get_admin_cancel_keyboard(lang))
 
 @router.message(AddProductState.waiting_for_photo, F.photo)
 async def process_photo(message: Message, state: FSMContext, session: AsyncSession, _, lang):
