@@ -67,7 +67,7 @@ async def handle_category_selection(message: Message, session: AsyncSession, _, 
 
 @router.callback_query(F.data.startswith("prod_page:"))
 async def handle_pagination(callback: types.CallbackQuery, session: AsyncSession, _, lang):
-    _, category_id, index = callback.data.split(":")
+    prefix, category_id, index = callback.data.split(":")
     category_id, index = int(category_id), int(index)
     
     product_service = ProductService(session)
