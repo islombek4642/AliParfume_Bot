@@ -160,7 +160,7 @@ async def checkout_process_address(message: Message, state: FSMContext, session:
     )
 
     await state.set_state(CheckoutState.waiting_for_confirmation)
-    await message.answer(invoice, parse_mode="HTML", reply_markup=get_checkout_keyboard(lang))
+    await message.answer(invoice, parse_mode="HTML", reply_markup=get_checkout_keyboard(lang), disable_web_page_preview=True)
 
 @router.message(CheckoutState.waiting_for_confirmation)
 async def checkout_confirm_final(message: Message, state: FSMContext, session: AsyncSession, bot: Bot, _, lang):
@@ -235,15 +235,14 @@ async def checkout_confirm_final(message: Message, state: FSMContext, session: A
         # Address: use stored value (already HTML if location, plain text if typed)
         address_html = address if address else "Ko'rsatilmagan"
 
-        # Profile link — always use HTML tg://user?id= link
-        # For @username users: Telegram knows them → link opens profile
-        # For non-username users: link still shows, admin can try tapping
-        # Additionally shown below as InlineButton for non-username users
-        profile_link = f'<a href="tg://user?id={tg_user.id}">Profilga o\'tish</a>'
+        # Profile display:
+        # - username bor → name + "Profilga o'tish" clickable link
+        # - username yo'q → faqat ism (tg:// link privacy tufayli ishlamaydi)
         if tg_user.username:
-            name_display = f"{full_name} · @{tg_user.username} · {profile_link}"
-        else:
+            profile_link = f'<a href="tg://user?id={tg_user.id}">Profilga o\'tish</a>'
             name_display = f"{full_name} · {profile_link}"
+        else:
+            name_display = full_name
 
         channel_text = (
             f"📦 <b>YANGI BUYURTMA!</b>\n\n"
