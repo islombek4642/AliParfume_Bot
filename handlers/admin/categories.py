@@ -1,5 +1,6 @@
 from aiogram import Router, F
 from aiogram.types import Message
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 from services.category_service import CategoryService
@@ -26,7 +27,7 @@ async def cat_add_start(message: Message, state: FSMContext, _, lang):
     await state.set_state(AdminStates.ADD_PRODUCT_CAT) # Reuse or use specific
     await message.answer(_("admin_cat_add_name_uz"), reply_markup=get_admin_cancel_keyboard(lang))
 
-@router.message(AdminStates.ADD_PRODUCT_CAT) # Simplified for example
+@router.message(StateFilter(AdminStates.ADD_PRODUCT_CAT)) # Simplified for example
 async def cat_add_process(message: Message, state: FSMContext, session: AsyncSession, _, lang):
     if message.text in I18N.get_all(AdminKeys.CANCELLED):
         await state.clear()

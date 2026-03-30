@@ -1,5 +1,6 @@
 from aiogram import Router, F, types
 from aiogram.types import Message, CallbackQuery
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from services.product_service import ProductService
 from services.category_service import CategoryService
@@ -32,7 +33,7 @@ async def start_search(message: Message, state: FSMContext, _, lang):
     await state.set_state(UserStates.SEARCH_PRODUCT)
     await message.answer(_("search_prompt"), reply_markup=get_admin_cancel_keyboard(lang))
 
-@router.message(UserStates.SEARCH_PRODUCT)
+@router.message(StateFilter(UserStates.SEARCH_PRODUCT))
 async def process_search(message: Message, state: FSMContext, session: AsyncSession, _, lang):
     if message.text in I18N.get_all(MenuKeys.BACK):
         await state.clear()

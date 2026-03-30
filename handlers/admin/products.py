@@ -1,5 +1,6 @@
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from services.product_service import ProductService
 from services.category_service import CategoryService
@@ -18,7 +19,7 @@ async def start_add_product(message: Message, state: FSMContext, session: AsyncS
     await state.set_state(AdminStates.ADD_PRODUCT_CAT)
     await message.answer(_("admin_prompt_cat"), reply_markup=get_categories_keyboard(lang, categories))
 
-@router.message(AdminStates.ADD_PRODUCT_CAT)
+@router.message(StateFilter(AdminStates.ADD_PRODUCT_CAT))
 async def process_category(message: Message, state: FSMContext, session: AsyncSession, _, lang):
     if message.text in I18N.get_all(AdminKeys.CANCELLED):
         await state.clear()
@@ -37,31 +38,31 @@ async def process_category(message: Message, state: FSMContext, session: AsyncSe
     await state.set_state(AdminStates.ADD_PRODUCT_NAME_UZ)
     await message.answer(_("admin_prompt_name_uz"), reply_markup=get_admin_cancel_keyboard(lang))
 
-@router.message(AdminStates.ADD_PRODUCT_NAME_UZ)
+@router.message(StateFilter(AdminStates.ADD_PRODUCT_NAME_UZ))
 async def process_name_uz(message: Message, state: FSMContext, _, lang):
     await state.update_data(name_uz=message.text)
     await state.set_state(AdminStates.ADD_PRODUCT_NAME_RU)
     await message.answer(_("admin_prompt_name_ru"))
 
-@router.message(AdminStates.ADD_PRODUCT_NAME_RU)
+@router.message(StateFilter(AdminStates.ADD_PRODUCT_NAME_RU))
 async def process_name_ru(message: Message, state: FSMContext, _, lang):
     await state.update_data(name_ru=message.text)
     await state.set_state(AdminStates.ADD_PRODUCT_DESC_UZ)
     await message.answer(_("admin_prompt_desc_uz"))
 
-@router.message(AdminStates.ADD_PRODUCT_DESC_UZ)
+@router.message(StateFilter(AdminStates.ADD_PRODUCT_DESC_UZ))
 async def process_desc_uz(message: Message, state: FSMContext, _, lang):
     await state.update_data(desc_uz=message.text)
     await state.set_state(AdminStates.ADD_PRODUCT_DESC_RU)
     await message.answer(_("admin_prompt_desc_ru"))
 
-@router.message(AdminStates.ADD_PRODUCT_DESC_RU)
+@router.message(StateFilter(AdminStates.ADD_PRODUCT_DESC_RU))
 async def process_desc_ru(message: Message, state: FSMContext, _, lang):
     await state.update_data(desc_ru=message.text)
     await state.set_state(AdminStates.ADD_PRODUCT_PRICE)
     await message.answer(_("admin_prompt_price"))
 
-@router.message(AdminStates.ADD_PRODUCT_PRICE)
+@router.message(StateFilter(AdminStates.ADD_PRODUCT_PRICE))
 async def process_price(message: Message, state: FSMContext, _, lang):
     try:
         price = float(message.text)
@@ -71,7 +72,7 @@ async def process_price(message: Message, state: FSMContext, _, lang):
     except ValueError:
         await message.answer(_("admin_prompt_price"))
 
-@router.message(AdminStates.ADD_PRODUCT_PHOTO, F.photo)
+@router.message(StateFilter(AdminStates.ADD_PRODUCT_PHOTO), F.photo)
 async def process_photo(message: Message, state: FSMContext, session: AsyncSession, _, lang):
     product_service = ProductService(session)
     data = await state.get_data()
@@ -114,7 +115,7 @@ async def admin_edit_stock_start(callback: CallbackQuery, callback_data: Product
     await callback.message.answer(_("admin_prompt_stock"), reply_markup=get_admin_cancel_keyboard(lang))
     await callback.answer()
 
-@router.message(AdminStates.EDIT_PRODUCT_VALUE)
+@router.message(StateFilter(AdminStates.EDIT_PRODUCT_VALUE))
 async def admin_process_edit_value(message: Message, state: FSMContext, session: AsyncSession, _, lang):
     if message.text in I18N.get_all(AdminKeys.CANCELLED):
         await state.clear()

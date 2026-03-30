@@ -1,5 +1,6 @@
 from aiogram import Router, F, Bot, types
 from aiogram.types import Message, CallbackQuery, LinkPreviewOptions
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from services.user_service import UserService
 from services.product_service import ProductService
@@ -72,7 +73,7 @@ async def checkout_start(message: Message, state: FSMContext, session: AsyncSess
     await state.set_state(UserStates.ENTER_ADDRESS)
     await message.answer(_("checkout_ask_address"), reply_markup=get_location_keyboard(lang))
 
-@router.message(UserStates.ENTER_ADDRESS)
+@router.message(StateFilter(UserStates.ENTER_ADDRESS))
 async def checkout_process_address(message: Message, state: FSMContext, session: AsyncSession, _, lang):
     if message.text in I18N.get_all("btn_cancel_checkout"):
         await state.clear()
@@ -113,7 +114,7 @@ async def checkout_process_address(message: Message, state: FSMContext, session:
     await state.set_state(UserStates.CONFIRM_ORDER)
     await message.answer(invoice, parse_mode="HTML", reply_markup=get_checkout_keyboard(lang), link_preview_options=LinkPreviewOptions(is_disabled=True))
 
-@router.message(UserStates.CONFIRM_ORDER, F.text.in_(I18N.get_all(MenuKeys.CHECKOUT)))
+@router.message(StateFilter(UserStates.CONFIRM_ORDER), F.text.in_(I18N.get_all(MenuKeys.CHECKOUT)))
 async def checkout_confirm_final(message: Message, state: FSMContext, session: AsyncSession, bot: Bot, _, lang):
     user_service = UserService(session)
     cart_service = CartService(session)

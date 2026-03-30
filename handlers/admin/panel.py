@@ -2,6 +2,7 @@ import asyncio
 import logging
 import io
 from aiogram import Router, F, Bot
+from aiogram.filters import StateFilter
 from aiogram.types import Message, BufferedInputFile, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
 from services.user_service import UserService
@@ -52,7 +53,7 @@ async def start_broadcast(message: Message, state: FSMContext, _, lang):
     await state.set_state(AdminStates.MAILING_TEXT)
     await message.answer(_("admin_broadcast_prompt"), reply_markup=get_admin_cancel_keyboard(lang))
 
-@router.message(AdminStates.MAILING_TEXT)
+@router.message(StateFilter(AdminStates.MAILING_TEXT))
 async def process_mailing_text(message: Message, state: FSMContext, _, lang):
     if message.text in I18N.get_all(AdminKeys.CANCELLED):
         await state.clear()
@@ -63,7 +64,7 @@ async def process_mailing_text(message: Message, state: FSMContext, _, lang):
     await state.set_state(AdminStates.MAILING_MEDIA)
     await message.answer(_("admin_mailing_media"), reply_markup=get_next_keyboard(lang))
 
-@router.message(AdminStates.MAILING_MEDIA)
+@router.message(StateFilter(AdminStates.MAILING_MEDIA))
 async def process_mailing_media(message: Message, state: FSMContext, _, lang):
     if message.text == I18N.get("admin_btn_next", lang):
         # Skip media
@@ -77,7 +78,7 @@ async def process_mailing_media(message: Message, state: FSMContext, _, lang):
     await state.set_state(AdminStates.MAILING_BUTTON)
     await message.answer(_("admin_mailing_button_text"), reply_markup=get_next_keyboard(lang))
 
-@router.message(AdminStates.MAILING_BUTTON)
+@router.message(StateFilter(AdminStates.MAILING_BUTTON))
 async def process_mailing_button(message: Message, state: FSMContext, session: AsyncSession, _, lang):
     if message.text == I18N.get("admin_btn_next", lang):
         # Skip button
@@ -109,7 +110,7 @@ async def process_mailing_button(message: Message, state: FSMContext, session: A
         reply_markup=get_confirmation_keyboard(lang)
     )
 
-@router.message(AdminStates.SELECT_ACTION, F.text.in_(I18N.get_all("admin_btn_yes")))
+@router.message(StateFilter(AdminStates.SELECT_ACTION), F.text.in_(I18N.get_all("admin_btn_yes")))
 async def confirm_broadcast(message: Message, state: FSMContext, bot: Bot, _, lang):
     data = await state.get_data()
     text = data.get("text")
@@ -137,7 +138,7 @@ async def confirm_broadcast(message: Message, state: FSMContext, bot: Bot, _, la
     # ... logic to run broadcast ...
     await state.clear()
 
-@router.message(AdminStates.SELECT_ACTION, F.text.in_(I18N.get_all("admin_btn_no")))
+@router.message(StateFilter(AdminStates.SELECT_ACTION), F.text.in_(I18N.get_all("admin_btn_no")))
 async def cancel_broadcast(message: Message, state: FSMContext, _, lang):
     await state.clear()
     await message.answer(_("admin_broadcast_cancelled"), reply_markup=get_main_menu_keyboard(lang, True))
