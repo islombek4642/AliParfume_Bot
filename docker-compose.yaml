@@ -30,6 +30,9 @@ services:
         condition: service_started
     env_file:
       - .env
+    environment:
+      - DB_HOST=db
+      - REDIS_HOST=redis
     restart: always
 
 volumes:
