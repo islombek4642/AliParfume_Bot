@@ -17,7 +17,19 @@ async def init_db():
     from sqlalchemy import text
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-        try:
-            await conn.execute(text("ALTER TABLE products ADD COLUMN IF NOT EXISTS stock INTEGER DEFAULT 0"))
-        except Exception:
-            pass
+        
+        # Migration: Ensure columns exist
+        migrations = [
+            ("users", "full_name", "VARCHAR(255)"),
+            ("users", "phone", "VARCHAR(20)"),
+            ("users", "is_admin", "BOOLEAN DEFAULT FALSE"),
+            ("users", "is_active", "BOOLEAN DEFAULT TRUE"),
+            ("users", "language", "VARCHAR(5) DEFAULT 'uz'"),
+            ("products", "stock", "INTEGER DEFAULT 0"),
+        ]
+        
+        for table, column, column_def in migrations:
+            try:
+                await conn.execute(text(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {column} {column_def}"))
+            except Exception:
+                pass
