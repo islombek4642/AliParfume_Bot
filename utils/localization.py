@@ -16,14 +16,18 @@ class Localization:
                 with open(os.path.join(locales_path, filename), "r", encoding="utf-8") as f:
                     self.locales[lang_code] = json.load(f)
 
-    def get(self, key: str, lang: str = "uz") -> str:
+    def get(self, key: Any, lang: str = "uz") -> str:
+        if hasattr(key, "value"): # Handle Enums
+            key = key.value
         # Fallback to default if lang not found
         lang_data = self.locales.get(lang, self.locales.get(self.default_lang, {}))
-        return lang_data.get(key, key)
+        return lang_data.get(str(key), str(key))
 
-    def get_all(self, key: str) -> list[str]:
+    def get_all(self, key: Any) -> list[str]:
         """Returns the translation of a key in all loaded languages."""
-        return [locale.get(key, key) for locale in self.locales.values()]
+        if hasattr(key, "value"): # Handle Enums
+            key = key.value
+        return [locale.get(str(key), str(key)) for locale in self.locales.values()]
 
 # Global instance
 I18N = Localization()

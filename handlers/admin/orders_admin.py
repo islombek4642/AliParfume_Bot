@@ -9,10 +9,12 @@ from data.constants import OrderCallback, OrderKeys
 from utils.localization import I18N
 import logging
 
+_ = I18N.get
+
 router = Router()
 
 @router.callback_query(OrderCallback.filter())
-async def handle_order_status_admin(callback: CallbackQuery, callback_data: OrderCallback, session: AsyncSession, bot: Bot):
+async def handle_order_status_admin(callback: CallbackQuery, callback_data: OrderCallback, session: AsyncSession, bot: Bot, _, lang):
     order_service = OrderService(session)
     product_service = ProductService(session)
     user_service = UserService(session)

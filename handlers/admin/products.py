@@ -94,21 +94,21 @@ async def process_photo(message: Message, state: FSMContext, session: AsyncSessi
 # --- Edit & Delete Products ---
 
 @router.callback_query(ProductCallback.filter(F.action == "delete"))
-async def admin_delete_product(callback: F.CallbackQuery, callback_data: ProductCallback, session: AsyncSession, _):
+async def admin_delete_product(callback: CallbackQuery, callback_data: ProductCallback, session: AsyncSession, _):
     product_service = ProductService(session)
     await product_service.delete(callback_data.product_id)
     await callback.answer(_("cart_delete_success"))
     await callback.message.delete()
 
 @router.callback_query(ProductCallback.filter(F.action == "edit_price"))
-async def admin_edit_price_start(callback: F.CallbackQuery, callback_data: ProductCallback, state: FSMContext, _, lang):
+async def admin_edit_price_start(callback: CallbackQuery, callback_data: ProductCallback, state: FSMContext, _, lang):
     await state.set_state(AdminStates.EDIT_PRODUCT_VALUE)
     await state.update_data(product_id=callback_data.product_id, field="price")
     await callback.message.answer(_("admin_prompt_price"), reply_markup=get_admin_cancel_keyboard(lang))
     await callback.answer()
 
 @router.callback_query(ProductCallback.filter(F.action == "edit_stock"))
-async def admin_edit_stock_start(callback: F.CallbackQuery, callback_data: ProductCallback, state: FSMContext, _, lang):
+async def admin_edit_stock_start(callback: CallbackQuery, callback_data: ProductCallback, state: FSMContext, _, lang):
     await state.set_state(AdminStates.EDIT_PRODUCT_VALUE)
     await state.update_data(product_id=callback_data.product_id, field="stock")
     await callback.message.answer(_("admin_prompt_stock"), reply_markup=get_admin_cancel_keyboard(lang))
