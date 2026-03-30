@@ -2,7 +2,7 @@ from typing import Any, Awaitable, Callable, Dict
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject, User
 from sqlalchemy.ext.asyncio import AsyncSession
-from database.requests import get_user
+from services.user_service import UserService
 from utils.localization import I18N
 
 class I18nMiddleware(BaseMiddleware):
@@ -17,7 +17,8 @@ class I18nMiddleware(BaseMiddleware):
             return await handler(event, data)
 
         session: AsyncSession = data.get("session")
-        db_user = await get_user(session, user.id)
+        user_service = UserService(session)
+        db_user = await user_service.get_by_id(user.id)
         
         lang = db_user.language if db_user else "uz"
         

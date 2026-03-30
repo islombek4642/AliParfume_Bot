@@ -12,9 +12,12 @@ class User(Base):
     full_name: Mapped[str] = mapped_column(String(255), nullable=True)
     phone: Mapped[str] = mapped_column(String(20), nullable=True)
     language: Mapped[str] = mapped_column(String(5), default="uz")
-    cart: Mapped[dict] = mapped_column(JSON, default=dict) # {"product_id": quantity}
+    is_admin: Mapped[bool] = mapped_column(default=False)
     is_active: Mapped[bool] = mapped_column(default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=get_now)
+
+    cart_items = relationship("CartItem", back_populates="user", cascade="all, delete-orphan")
+    orders = relationship("Order", back_populates="user")
 
 class Category(Base):
     __tablename__ = "categories"
@@ -40,14 +43,41 @@ class Product(Base):
     photo_id: Mapped[str] = mapped_column(String(255), nullable=True)
 
     category = relationship("Category", back_populates="products")
+    cart_items = relationship("CartItem", back_populates="product")
+
+class CartItem(Base):
+    __tablename__ = "cart_items"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id", ondelete="CASCADE"))
+    quantity: Mapped[int] = mapped_column(default=1)
+
+    user = relationship("User", back_populates="cart_items")
+    product = relationship("Product", back_populates="cart_items")
 
 class Order(Base):
     __tablename__ = "orders"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    items: Mapped[dict] = mapped_column(JSON) # [{"product_id": 1, "quantity": 2}, ...]
     total_price: Mapped[float] = mapped_column(Float)
     status: Mapped[str] = mapped_column(String(20), default="pending")
     address: Mapped[str] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=get_now)
+
+    user = relationship("User", back_populates="orders")
+    items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
+
+class OrderItem(Base):
+    __tablename__ = "order_items"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id", ondelete="CASCADE"))
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id", ondelete="SET NULL"), nullable=True)
+    name: Mapped[str] = mapped_column(String(255)) # Name at the time of order
+    quantity: Mapped[int] = mapped_column(default=1)
+    price: Mapped[float] = mapped_column(Float) # Price at the time of order
+
+    order = relationship("Order", back_populates="items")
+    product = relationship("Product")

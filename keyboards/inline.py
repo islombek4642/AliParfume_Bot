@@ -1,79 +1,61 @@
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from data.constants import ProductCallback, CategoryCallback, OrderCallback, PaginationCallback
 from utils.localization import I18N
 
-def get_product_inline_keyboard(lang: str, category_id: int, current_index: int, total_count: int, product_id: int) -> InlineKeyboardMarkup:
+def get_categories_inline(categories: list, lang: str) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    for cat in categories:
+        name = cat.name_uz if lang == "uz" else cat.name_ru
+        builder.row(InlineKeyboardButton(text=name, callback_data=CategoryCallback(category_id=cat.id).pack()))
+    return builder.as_markup()
+
+def get_product_inline(category_id: int, index: int, total: int, product_id: int, lang: str, is_admin: bool = False) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    
+    # Buy button
+    builder.row(InlineKeyboardButton(text=I18N.get("btn_buy_inline", lang), callback_data=ProductCallback(category_id=category_id, index=index, product_id=product_id, action="buy").pack()))
+    
     # Navigation buttons
-    nav_buttons = []
-    
-    if current_index > 0:
-        nav_buttons.append(InlineKeyboardButton(
-            text=I18N.get("btn_prev", lang),
-            callback_data=f"prod_page:{category_id}:{current_index - 1}"
-        ))
-    
-    nav_buttons.append(InlineKeyboardButton(
-        text=I18N.get("product_count", lang).format(current=current_index + 1, total=total_count),
-        callback_data="noop"
-    ))
-    
-    if current_index < total_count - 1:
-        nav_buttons.append(InlineKeyboardButton(
-            text=I18N.get("btn_next", lang),
-            callback_data=f"prod_page:{category_id}:{current_index + 1}"
-        ))
-    
-    # Assembly
-    buttons = [
-        nav_buttons,
-        [InlineKeyboardButton(
-            text=I18N.get("btn_buy_inline", lang),
-            callback_data=f"buy_inline:{product_id}"
-        )],
-        [InlineKeyboardButton(
-            text=I18N.get("btn_back", lang),
-            callback_data=f"back_to_cats"
-        )]
-    ]
-    
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
-
-
-from data.constants import OrderKeys
-
-# Sequential flow using I18N keys — bilingual labels (UZ/RU in one string)
-def _build_flow() -> dict:
-    uz = "uz"  # buttons are bilingual, reading from UZ locale which has both languages
-    return {
-        "pending":    [(I18N.get(OrderKeys.BTN_ACCEPT,       uz), "processing"),
-                       (I18N.get(OrderKeys.BTN_CANCEL_ORDER, uz), "cancelled")],
-        "processing": [(I18N.get(OrderKeys.BTN_SHIPPING,     uz), "shipped"),
-                       (I18N.get(OrderKeys.BTN_CANCEL_ORDER, uz), "cancelled")],
-        "shipped":    [(I18N.get(OrderKeys.BTN_DELIVERED,    uz), "completed")],
-        "completed":  [],
-        "cancelled":  [],
-    }
-
-def get_order_admin_keyboard(order_id: int, current_status: str = "pending") -> InlineKeyboardMarkup | None:
-    """Sequential vertical keyboard for admin order management in the channel."""
-    flow = _build_flow()
-    steps = flow.get(current_status, [])
-    if not steps:
-        return None
-    buttons = [
-        [InlineKeyboardButton(text=label, callback_data=f"order_status:{order_id}:{next_s}")]
-        for label, next_s in steps
-    ]
-    return InlineKeyboardMarkup(inline_keyboard=buttons)
-
-
-
-def get_my_orders_keyboard(orders: list, index: int) -> InlineKeyboardMarkup:
-    """Paginated 'My Orders' keyboard for users."""
-    total = len(orders)
-    nav = []
+    nav_btns = []
     if index > 0:
-        nav.append(InlineKeyboardButton(text="⬅️", callback_data=f"my_orders:{index - 1}"))
-    nav.append(InlineKeyboardButton(text=f"{index + 1} / {total}", callback_data="noop"))
+        nav_btns.append(InlineKeyboardButton(text=I18N.get("btn_prev", lang), callback_data=PaginationCallback(page=index - 1, action="prev").pack()))
+    
+    # Back to categories
+    nav_btns.append(InlineKeyboardButton(text=I18N.get("btn_back", lang), callback_data=CategoryCallback(category_id=0).pack()))
+    
     if index < total - 1:
-        nav.append(InlineKeyboardButton(text="➡️", callback_data=f"my_orders:{index + 1}"))
-    return InlineKeyboardMarkup(inline_keyboard=[nav])
+        nav_btns.append(InlineKeyboardButton(text=I18N.get("btn_next", lang), callback_data=PaginationCallback(page=index + 1, action="next").pack()))
+    
+    builder.row(*nav_btns)
+    
+    # Admin Edit/Delete buttons
+    if is_admin:
+        builder.row(
+            InlineKeyboardButton(text=I18N.get("admin_edit_price", lang), callback_data=ProductCallback(category_id=category_id, index=index, product_id=product_id, action="edit_price").pack()),
+            InlineKeyboardButton(text=I18N.get("admin_edit_stock", lang), callback_data=ProductCallback(category_id=category_id, index=index, product_id=product_id, action="edit_stock").pack())
+        )
+        builder.row(
+            InlineKeyboardButton(text="🗑 " + I18N.get("btn_cart_delete", lang), callback_data=ProductCallback(category_id=category_id, index=index, product_id=product_id, action="delete").pack())
+        )
+        
+    return builder.as_markup()
+
+def get_order_admin_keyboard(order_id: int, current_status: str = "pending") -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    
+    if current_status == "pending":
+        builder.row(InlineKeyboardButton(text=I18N.get("order_btn_accept", "uz"), callback_data=OrderCallback(order_id=order_id, status="processing").pack()))
+    elif current_status == "processing":
+        builder.row(InlineKeyboardButton(text=I18N.get("order_btn_shipping", "uz"), callback_data=OrderCallback(order_id=order_id, status="shipped").pack()))
+    elif current_status == "shipped":
+        builder.row(InlineKeyboardButton(text=I18N.get("order_btn_delivered", "uz"), callback_data=OrderCallback(order_id=order_id, status="completed").pack()))
+        
+    if current_status not in ["completed", "cancelled"]:
+        builder.row(InlineKeyboardButton(text=I18N.get("order_btn_cancel_order", "uz"), callback_data=OrderCallback(order_id=order_id, status="cancelled").pack()))
+        
+    return builder.as_markup()
+
+def get_my_orders_keyboard() -> InlineKeyboardMarkup:
+    # Placeholder for pagination if needed
+    return None

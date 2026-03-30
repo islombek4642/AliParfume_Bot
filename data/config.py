@@ -32,6 +32,18 @@ class Settings(BaseSettings):
     def database_url(self) -> str:
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
+    # Redis Settings
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+
+    @property
+    def redis_url(self) -> str:
+        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/0"
+    
+    # DB Pooling
+    DB_POOL_SIZE: int = 20
+    DB_MAX_OVERFLOW: int = 10
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 # Global settings instance

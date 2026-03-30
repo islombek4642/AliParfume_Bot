@@ -15,12 +15,19 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: always
 
+  redis:
+    image: redis:7-alpine
+    container_name: aliparfume_redis
+    restart: always
+
   bot:
     build: .
     container_name: aliparfume_bot
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
     env_file:
       - .env
     restart: always
