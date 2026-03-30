@@ -7,8 +7,7 @@ from services.order_service import OrderService
 from services.cart_service import CartService
 from keyboards.reply import (
     get_quantity_keyboard, get_main_menu_keyboard, 
-    get_cart_keyboard, get_cart_delete_keyboard,
-    get_location_keyboard, get_checkout_keyboard
+    get_cart_keyboard, get_location_keyboard, get_checkout_keyboard
 )
 from keyboards.inline import get_order_admin_keyboard, get_my_orders_keyboard
 from utils.localization import I18N
