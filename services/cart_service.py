@@ -1,3 +1,4 @@
+from sqlalchemy import select, delete
 from sqlalchemy.orm import selectinload
 from database.models import CartItem, User
 from services.base_service import BaseService

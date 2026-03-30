@@ -11,7 +11,14 @@ router = Router()
 @router.message(F.text.in_(I18N.get_all(MenuKeys.ORDERS)))
 async def show_history(message: Message, session: AsyncSession, _, lang):
     order_service = OrderService(session)
-    orders = await order_service.get_user_orders(message.from_user.id)
+    user_service = UserService(session)
+    
+    user = await user_service.get_by_id(message.from_user.id)
+    if not user:
+        await message.answer(_("cart_empty"))
+        return
+        
+    orders = await order_service.get_user_orders(user.id)
     
     if not orders:
         await message.answer(_("history_header") + "\n" + _("cart_empty"))
